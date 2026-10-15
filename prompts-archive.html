@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Bubble People — Prompt Archive</title>
+  <style>
+:root {
+  --bg: #ffffff;
+  --text: #2e3338;
+  --text-muted: #6e7681;
+  --heading: #222428;
+  --link: #5e81ac;
+  --code-bg: #f6f6f6;
+  --code-text: #c7254e;
+  --hr: #e0e0e0;
+  --quote-border: #c0c0c0;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+    Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 56px 64px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--heading);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+}
+h1 { font-size: 2.0em; border-bottom: 1px solid var(--hr); padding-bottom: 0.3em; margin-top: 0; }
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.2em; }
+h4 { font-size: 1.05em; }
+
+p { margin: 0.8em 0; }
+
+strong { color: var(--heading); }
+em { color: var(--text); }
+
+ul, ol {
+  margin: 0.6em 0 0.8em;
+  padding-left: 1.6em;
+}
+li { margin: 0.2em 0; }
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+pre {
+  background: var(--code-bg);
+  border-radius: 6px;
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+pre code { background: transparent; color: var(--text); padding: 0; }
+
+blockquote {
+  margin: 1em 0;
+  padding: 0.2em 1em;
+  border-left: 4px solid var(--quote-border);
+  color: var(--text-muted);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--hr);
+  margin: 2em 0;
+}
+
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Page break marker */
+.page-break {
+  page-break-after: always;
+  break-after: page;
+  height: 0;
+}
+
+/* Print rules */
+@page {
+  size: Letter;
+  margin: 0.6in;
+}
+
+@media print {
+  main { padding: 0; max-width: none; }
+  h1 { page-break-after: avoid; }
+  h2, h3 { page-break-after: avoid; }
+  pre, blockquote { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+  <main><h1>Bubble People — Prompt Archive</h1>
+<p>A consolidated record of every prompt used to generate the bpd video pipeline&#39;s clips.</p>
+<ul>
+<li><strong>Shared prompts</strong> (<code>style.md</code>, <code>green-screen.md</code>) are applied to every render.</li>
+<li><strong>Per-clip prompts</strong> describe action, framing, timing, and aesthetic guards.</li>
+<li><strong>Multi-source prompts</strong> drive renders from two or more reference paintings.</li>
+</ul>
+<p>Generated 2026-05-08 from <code>scripts/build-prompts-archive.ts</code>.</p>
+<div class="page-break"></div><p>Animate this painting strictly within the visual language of the original work. Every frame of the output must look as though it was redrawn by hand using the same materials, on the same surface, by the same artist. The following constraints are absolute and override any default model behavior:</p>
+<p><strong>Medium fidelity.</strong> Identify the physical medium of the source image — pastel, oil stick, acrylic, ink, pencil, gold leaf, collage, or any combination — and replicate the exact texture, tooth, drag, opacity, and layering behavior of that medium in every frame. Brushstrokes, pastel smudges, ink bleeds, paper grain, canvas weave, and any visible material texture must persist and behave consistently. If the surface is raw, unprimed, or found material (kraft paper, cardboard, newsprint, wood), that surface must remain visible and unaltered throughout.</p>
+<p><strong>No upward refinement.</strong> Never increase the level of detail, anatomical accuracy, geometric precision, or resolution beyond what exists in the source painting. If the original contains rough outlines, keep them rough. If proportions are naive or distorted, preserve that distortion. If edges are ragged, do not clean them. If forms are flat, do not add volume. The model must not &quot;improve&quot; the artwork in any direction.</p>
+<p><strong>No anthropomorphization or object recognition override.</strong> Do not interpret abstract or simplified shapes as realistic objects, faces, animals, or bodies and then render them accordingly. A circle with two dots is not an invitation to draw a photorealistic face. A rounded form is not a prompt to model anatomical musculature. Treat every shape as a painted mark first and a representational symbol second. Motion should be applied to the shapes as they are, not to what they might depict.</p>
+<p><strong>No CG lighting, depth, or dimensionality.</strong> Do not add shadows, ambient occlusion, volumetric light, depth of field, atmospheric perspective, rim lighting, or any spatial cue not already present in the source. If the painting contains gold leaf or metallic elements, their shimmer should behave like physical metallic material catching ambient light — not like a CG emission, glow, or particle effect.</p>
+<p><strong>Frame-by-frame redraw aesthetic.</strong> All motion should look as though each frame was individually redrawn by hand and photographed in sequence — a stop-motion or zoetrope quality. Allow slight natural variation between frames: minor wobble in outlines, subtle shifts in color fill boundaries, small inconsistencies in mark placement. This handmade imprecision is a feature, not an artifact to be corrected.</p>
+<p><strong>Static camera.</strong> No zoom, pan, dolly, tilt, parallax, or camera shake unless explicitly specified in the animation direction. The frame is the painting surface. It does not move.</p>
+<p><strong>Color palette lock.</strong> Use only the colors present in the source image. Do not introduce new hues, increase saturation beyond what the medium produces, or shift the overall color temperature. If the palette is muted and earthy, it stays muted and earthy. If there is a single accent color, it remains singular.</p>
+<p><strong>Compositional anchor.</strong> Any elements in the painting that function as ground, base, border, or frame should remain static and fixed unless explicitly directed otherwise. Motion should occur within the composition, not to the composition.</p>
+<div class="page-break"></div><p>CRITICAL OUTPUT REQUIREMENTS — these override all other instructions:</p>
+<ol>
+<li>The video MUST show ONLY the bubble people described above.  UNLESS specifically prompted above, do NOT include the painted environment, walls, props, scenery, ground, sky, or any background elements from the source painting.</li>
+<li>The entire background MUST be a single flat solid chroma-key green: hex #00B140. No gradients, no textures, no shadows cast on the background, no light spill, no vignette, no atmospheric haze.</li>
+<li>Lighting on the bubble people must be even and clean — like studio chroma-key footage. Avoid colored rim light that would contaminate the green for keying.</li>
+<li>Edges of the bubble people must be hard and clean — minimize motion blur, semi-transparency, hair-fine wisps, or fog around silhouettes. The output will be chroma-keyed in Final Cut Pro and clean edges are essential.</li>
+<li>Render the bubble people in the same visual style as the source painting (use the painting as a reference image), but place them on the flat green backdrop described above — not the painting&#39;s original setting.</li>
+<li>Animate exactly the action described in the &quot;Action&quot; section. The motion should feel natural and deliberate, not frantic.</li>
+</ol>
+<div class="page-break"></div><h1>NeedsMoreHoison — Animation Direction</h1>
+<p><strong>Subject:</strong> The Bubble Person (BP) from the source painting — head with gold-leaf halo, torso, and bowl of pho held in front of them. Reproduce BP exactly as painted: same line weight, same pastel and watercolor marks, same flat naive construction, same dot eyes, same rough dark contour lines. The bowl and its contents (the star/asterisk mark on the surface of the pho) are part of BP and move with them as a single unit.</p>
+<p><strong>Scale and position (strict):</strong> BP must be SMALL in the frame. BP&#39;s full height — from the bottom of BP&#39;s body to the top of BP&#39;s halo — must occupy no more than 33% of the frame&#39;s total vertical height. BP must sit in the LOWER THIRD of the frame: BP&#39;s bottom edge rests near the bottom edge of the frame, and the top of BP&#39;s halo must NOT extend above the lower one-third of the frame. The upper two-thirds of the frame must remain empty chroma green throughout the entire clip — no part of BP, the halo, or the bowl ever enters the upper two-thirds.</p>
+<p><strong>Action timing (strict, 8-second clip):</strong></p>
+<ul>
+<li>t=0.0 to t=0.5 — empty frame, only flat chroma green (#00B140), no BP visible at all.</li>
+<li>t=0.5 to t=1.0 — BP&#39;s right edge begins to appear at the left side of the frame, entering steadily.</li>
+<li>t=1.0 to t=7.0 — BP glides rightward across the full width of the frame at a steady, unhurried pace, staying in the lower third.</li>
+<li>t=7.0 to t=7.5 — BP&#39;s left edge clears the right side of the frame, exiting completely.</li>
+<li>t=7.5 to t=8.0 — empty frame, only flat chroma green, identical to t=0.0. Absolutely no part of BP, the halo, or the bowl is visible.</li>
+</ul>
+<p>The final frame at t=8.0 MUST be pure empty chroma green — pixel-for-pixel comparable to the first frame. If BP is still partially in frame at t=8.0, the take has failed.</p>
+<p><strong>Walk motion:</strong> BP does not have legs. The walk is a gentle lateral glide with a slight rhythmic vertical bob — a small up-and-down oscillation (no more than 2–3% of BP&#39;s height) timed like a relaxed walking cadence, roughly two bobs per second. BP may also tilt very slightly forward in the direction of travel, as if leaning into the walk. The bowl stays level and steady relative to BP&#39;s body — it does not slosh, tilt, or bounce independently.</p>
+<p><strong>Duration:</strong> 8 seconds, covering full left-entry to right-exit.</p>
+<p><strong>Camera:</strong> Completely static. No movement of any kind.</p>
+<div class="page-break"></div><h1>GetOnboardTheFunkyWagon — Animation Direction</h1>
+<p><strong>Subject:</strong> The Bubble Person (BP) from the source painting — a busker bubble person with his guitar. Reproduce BP and the guitar exactly as painted: same line weight, same pastel / watercolor / mixed-media marks, same flat naive construction, same dot eyes, same rough dark contour lines, same color choices. The guitar is part of BP&#39;s silhouette and moves with him as a single unit — BP and the guitar are inseparable for this entire clip.</p>
+<p><strong>Backstory (for performance only — do not render any of this literally):</strong> BP is unhoused, busking on the streets of San Francisco. He is down on his luck — weary, drained, hollowed out. He is NOT actively performing right now; the guitar is just <em>with</em> him, between songs or between hours. His state is forlorn and heavy. Whether he has been using something is left ambiguous to a passing observer.</p>
+<p><strong>Scale (strict):</strong> BP must be SMALL in the frame. BP&#39;s full height — from the topmost point of his head to the bottommost point of his body or the guitar (whichever is lower) — must occupy no more than 33% of the frame&#39;s total vertical height. BP&#39;s full silhouette, including the entire guitar, is fully visible at all times and is never cropped at any edge of the frame. BP&#39;s exact vertical placement is not important; what matters is that BP reads as a small figure and that empty chroma-green dominates the composition.</p>
+<p><strong>Pose — leaning against an unseen wall:</strong> BP stands but is clearly LEANING AGAINST A WALL on his left side. That wall is OFF-SCREEN to the left of the frame and does not appear in the rendered output — it will be composited in later. The wall is implied ENTIRELY by BP&#39;s body language:</p>
+<ul>
+<li>Shoulders slightly slumped, with the left shoulder slightly lower than the right.</li>
+<li>Weight shifted onto BP&#39;s left side, hip cocked slightly leftward.</li>
+<li>Torso and head tilted very subtly to the left, as if the body&#39;s vertical axis is resting against an invisible plane just off-frame.</li>
+<li>Overall posture is loose, slack, and weary — not balanced or erect.</li>
+</ul>
+<p>There are NO visible surfaces, walls, ground, or props in the frame other than BP and the guitar. The lean must be communicated by posture alone.</p>
+<p><strong>Guitar:</strong> BP holds the guitar loosely and casually — by the neck in one hand with the body resting against his leg or hip, OR cradled in his arms with no hand on the strings. He is absolutely NOT strumming, picking, fretting, or playing the guitar in any way. No hand movement on the strings, no finger movement on the fretboard. The guitar is a quiet companion, not an instrument in use.</p>
+<p><strong>Movement (strict, 8-second clip):</strong> BP is essentially stationary. The only motion is subtle, slow, and heavy:</p>
+<ul>
+<li><strong>Head turns:</strong> BP&#39;s head drifts slowly from side to side, scanning the street with an unfocused gaze. Roughly two slow drifts across the 8 seconds — e.g. facing slightly right at t=0, drifting to face slightly left by t≈4, drifting back toward slightly right by t=8. The motion is aimless and drifting, not deliberate.</li>
+<li><strong>Eyes:</strong> The painted dot eyes appear soft, unfocused, dazed. They drift roughly with the head but may lag a beat behind. No sharp tracking.</li>
+<li><strong>Blinks:</strong> One or two slow, heavy blinks somewhere across the clip — eyelids close, hold for a half-beat, reopen lazily. (If the painting style does not depict eyelids, omit this and let the dot eyes simply soften momentarily.)</li>
+<li><strong>Body sway:</strong> A barely-perceptible vertical micro-oscillation, no more than 1–2% of BP&#39;s height — like someone whose balance is slightly compromised but who is supported by the wall behind him. No falling, no jerks.</li>
+<li><strong>Mouth:</strong> If depicted, the mouth is slack and slightly parted rather than set or tight. No speaking, no singing, no expression changes.</li>
+<li><strong>Hands:</strong> Hands are STILL. No strumming, no fidgeting, no gesturing. If a hand rests on the guitar, it stays where it is.</li>
+</ul>
+<p><strong>Mood:</strong> Heavy, slow, drained, forlorn. BP is barely present in his own moment. No frantic motion, no quick gestures, no rising energy, no reactive expressions. The clip is a sustained observation of a forlorn busker between songs.</p>
+<p><strong>Duration:</strong> 8 seconds, sustaining the slow drifting movement throughout. No event happens during the clip — the entire 8 seconds is one mood, one pose, one breath.</p>
+<p><strong>Camera:</strong> Completely static. No movement of any kind. No zoom, pan, dolly, tilt, parallax, or shake.</p>
+<div class="page-break"></div><h1>WheresMyDangKeys — Animation Direction</h1>
+<p><strong>Subject:</strong> The Bubble Person (BP) from the source painting — bubble person carrying a padlock. Reproduce BP and the padlock with absolute fidelity to the source painting: same line weight, same painted / pastel / watercolor / mixed-media marks, same flat naive construction, same dot eyes, same rough dark contour lines, same color choices, and SAME BODY SHAPE AND PROPORTIONS. The lock is part of BP and moves with them as a single unit — BP holds onto the lock for the entirety of the clip.</p>
+<p><strong>Aesthetic fidelity (strict — this is the most important rule of this clip):</strong> BP&#39;s body shape, silhouette, mass, and proportions must match the source painting EXACTLY in every frame. Do NOT add volume, weight, roundness, three-dimensional bulk, or anatomical mass beyond what is visible in the painted source. Do NOT anthropomorphize — do NOT interpret BP&#39;s flat painted shapes as a real human body and re-render them with realistic proportions, musculature, fleshiness, or dimensionality. If the source shows BP as a slim flat shape with rough dark contour lines, BP REMAINS a slim flat shape with rough dark contour lines, in every frame, throughout the entire clip. This rule overrides any motion-related interpretation: BP does not &quot;fill out&quot; or become more rounded as they walk forward. The aesthetic-fidelity rules from the style prompt (No upward refinement, No anthropomorphization or object recognition override) apply absolutely here.</p>
+<p><strong>No other objects in the frame (strict):</strong> The rendered frame contains ONLY BP and the padlock, on flat chroma-green. There is NO bus, NO vehicle, NO other person, NO ground, NO sidewalk, NO building, NO street, NO shadow, NO objects of any kind other than BP and the lock. BP is suspended on flat green; nothing else is rendered. (The viewer&#39;s compositing software will add the SF street and any other elements after the fact.)</p>
+<p><strong>Backstory (for performance only — do NOT render literally):</strong> BP is walking slowly toward the viewer, holding their padlock and patting their clothing in search of the misplaced key. BP is mildly preoccupied — they know the key is somewhere on them, but they can&#39;t put their hand on it.</p>
+<p><strong>Framing &amp; camera:</strong> A locked-off, dead-on cinematic shot looking straight at BP. The camera is static — no zoom, pan, dolly, tilt, parallax, or shake. The frame never moves.</p>
+<p><strong>Horizontal position (strict):</strong> BP is CENTERED HORIZONTALLY in the frame for the ENTIRE clip. BP must be in the center at t=0, in the center at t=4, and in the center at t=8. BP NEVER enters from any edge of the frame. BP NEVER drifts toward the left or right edge. There is no horizontal travel; the only travel is forward toward the camera. The center of BP&#39;s silhouette stays at the horizontal center of the frame, frame-after-frame.</p>
+<p><strong>Scale (BP grows naturally as they approach the camera):</strong></p>
+<ul>
+<li>t=0.0 — BP is already visible in the center of the frame, small and distant. BP&#39;s full height is no more than 20% of the frame&#39;s vertical height at this moment.</li>
+<li>t=8.0 — BP has walked closer to the camera and is larger in apparent size, but BP&#39;s full height NEVER exceeds 60% of the frame&#39;s vertical height.</li>
+<li>The growth is gradual and continuous between those two points.</li>
+<li>BP&#39;s full silhouette, including the padlock, remains fully visible at all times — never cropped at any edge of the frame.</li>
+</ul>
+<p><strong>Movement (strict, 8-second clip):</strong></p>
+<ul>
+<li>BP walks slowly and steadily FORWARD, directly toward the camera, in a straight Z-axis line. There is NO sideways component, NO entry from any frame edge, NO exit from any frame edge.</li>
+<li>BP is already in the frame, dead-centered horizontally, at t=0.</li>
+<li>BP is still in the frame, dead-centered horizontally, at t=8.</li>
+<li>BP faces the camera (or near-faces) for the entire clip. Match the painted BP&#39;s facing/silhouette as much as possible.</li>
+<li>BP does not stop or turn. BP continues a slow forward approach through the final frame.</li>
+</ul>
+<p><strong>Walk motion:</strong> Match the leg-or-no-leg construction shown in the source painting — BP&#39;s legs (or lack of legs) appear exactly as they are painted. The walk is a gentle forward glide with a slight rhythmic vertical bob — small up-and-down oscillation timed like a relaxed walking cadence, roughly two bobs per second. The motion is unhurried and slightly distracted.</p>
+<p><strong>Searching action (concurrent with the walk):</strong></p>
+<ul>
+<li>BP holds the padlock in one hand throughout. They glance DOWN at the lock periodically, as if confirming it&#39;s still there or examining it.</li>
+<li>The free hand pats and searches BP&#39;s own clothing intermittently — chest, one side, the other side. Three or four distinct slow pats across the 8 seconds. Idle, not frantic.</li>
+<li>BP&#39;s head occasionally looks down at the ground as if checking whether the key fell, then back up to face the camera.</li>
+<li>Facial expression — within the constraints of the painted face — reads as mildly confused, slightly annoyed. NOT panicked.</li>
+</ul>
+<p><strong>Mood:</strong> Mildly anxious, distracted, exasperated. The energy of &quot;where the heck did I put it?&quot; — quiet annoyance, not alarm. BP is fairly sure they&#39;ll find the key eventually.</p>
+<p><strong>Duration:</strong> 8 seconds, sustaining the centered forward approach with continuous searching motion.</p>
+<div class="page-break"></div><h1>IHaveSomethingToTellYou — Animation Direction</h1>
+<p><strong>Subjects (TWO bubble people):</strong> Two Bubble People (BPs) from the source painting — TRAVELING COMPANIONS. Reproduce both BPs with absolute fidelity to the source painting: same line weight, same painted / pastel / watercolor / mixed-media marks, same flat naive construction, same dot eyes, same rough dark contour lines, same color choices, and SAME BODY SHAPES AND PROPORTIONS as in the source. Both BPs are present in the frame together throughout the entire clip — neither one leaves at any point.</p>
+<p><strong>Aesthetic fidelity (strict — most important rule of this clip):</strong> Both BPs&#39; body shapes, silhouettes, mass, and proportions must match the source painting EXACTLY in every frame. Do NOT add volume, weight, roundness, three-dimensional bulk, or anatomical mass beyond what is visible in the painted source. Do NOT anthropomorphize — do NOT interpret these flat painted shapes as real human bodies and re-render them with realistic proportions, musculature, fleshiness, or dimensionality. If the source shows the BPs as flat naive shapes with rough dark contour lines, they REMAIN flat naive shapes with rough dark contour lines, in every frame. The aesthetic-fidelity rules from the style prompt (No upward refinement, No anthropomorphization or object recognition override) apply absolutely.</p>
+<p><strong>No other objects in the frame (strict):</strong> The rendered frame contains ONLY the two BPs, on flat chroma-green. There is NO ground, NO sidewalk, NO building, NO landscape, NO other person, NO objects, NO shadows, NOTHING else other than the two BPs.</p>
+<p><strong>Scale (strict — much smaller than typical):</strong> Both BPs are VERY SMALL in the frame. Cinematically the camera is positioned far back — the BPs read as distant figures seen across a wide expanse, like watching two travelers from across a field. The full height of either BP — from the topmost point to the bottommost point — must occupy NO MORE THAN 15% of the frame&#39;s vertical height. Both BPs&#39; full silhouettes (heads, bodies, any accessories shown in the source) are fully visible at all times — never cropped at any edge of the frame. Vertical placement is unconstrained — what matters is that they read as small distant figures with the vast majority of the frame occupied by empty chroma-green around them.</p>
+<p><strong>Companion arrangement (strict):</strong> The two BPs walk and stand SIDE-BY-SIDE as traveling companions. They are next to each other on roughly the same horizontal line — not one in front of the other, not stacked. They may have a small gap between them or be close together (match whatever the painted source suggests). They MOVE TOGETHER through the entire clip and NEVER separate. Each BP retains its own painted identity — do not merge them or swap their features.</p>
+<p><strong>Movement timing (strict, 8-second clip):</strong></p>
+<ul>
+<li><strong>t=0.0 to t=0.5</strong> — empty frame, only flat chroma green. Neither BP is visible. Both are off-screen to the left.</li>
+<li><strong>t=0.5 to t=3.0</strong> — both BPs glide IN FROM THE LEFT EDGE of the frame, walking rightward together as a pair. In profile or 3/4 view, both facing rightward. They move at a steady, unhurried pace, side-by-side.</li>
+<li><strong>t=3.0 to t=3.5</strong> — both BPs come to a gentle stop at the HORIZONTAL CENTER of the frame, still side-by-side. The stop is settled, not abrupt.</li>
+<li><strong>t=3.5 to t=5.0</strong> — both BPs gradually TURN AWAY from the camera, rotating from rightward-facing profile so that they end up with their BACKS FULLY FACING THE CAMERA. The viewer is now looking at the backs of both BPs. They turn TOGETHER, in unison, at the same pace. Bodies remain in the same horizontal position throughout the rotation.</li>
+<li><strong>t=5.0 to t=8.0</strong> — with their backs to the camera, both BPs slowly tilt their HEADS UP, gazing UPWARD at something off-frame above them. We see the BACKS of their heads tilting up. This upward gaze is sustained all the way through the final frame at t=8.0. Bodies remain still and centered — only the heads tilt.</li>
+</ul>
+<p><strong>Walk motion (during walk-in only):</strong> Match the leg-or-no-leg construction shown in the source painting. The walk is a gentle lateral glide with a slight rhythmic vertical bob — a small up-and-down oscillation timed like a relaxed walking cadence, roughly two bobs per second. Both BPs bob in sync, like friends in step with each other. Unhurried.</p>
+<p><strong>Turn motion:</strong> The pivot from rightward-facing profile to backs-to-camera happens smoothly over ~1.5 seconds. Both BPs rotate together, at the same rate, in the same direction. No spinning, no quick flip — a calm, deliberate rotation. The end state is unambiguous: both BPs are facing AWAY from the camera, with their backs squarely toward the viewer.</p>
+<p><strong>Look-up motion:</strong> Slow, smooth, sustained head-tilt upward, performed with their backs to the camera. We see the backs of their heads tilt up. The gaze is held through the end of the clip — they are looking at something significant above them and ahead of them, off-screen.</p>
+<p><strong>Mood:</strong> Anticipatory, quiet, reverent. Two travelers have arrived somewhere; they pause together; they turn AWAY from us to face whatever lies beyond the frame; they look up at something significant above. The viewer is positioned BEHIND them, watching them behold something — we share their gaze without being addressed by it. The energy of the title &quot;I Have Something To Tell You&quot; — a quiet, suspended moment, on the edge of a revelation. Not dramatic, not theatrical — still and intentional.</p>
+<p><strong>Camera:</strong> Completely static. No movement of any kind. No zoom, pan, dolly, tilt, parallax, or shake.</p>
+<p><strong>Duration:</strong> 8 seconds, exactly as timed above.</p>
+<div class="page-break"></div><h1>WhiteRabbitWhiteRabbitWhiteRabbit — Animation Direction</h1>
+<p><strong>Subject:</strong> The Bubble Person (BP) from the source painting — bubble person who wields fire. Reproduce BP and the fire with absolute fidelity to the source painting: same line weight, same painted / pastel / watercolor / mixed-media marks, same flat naive construction, same dot eyes, same rough dark contour lines, same color choices, and SAME BODY SHAPE AND PROPORTIONS as in the source. The fire is the focal element of this clip.</p>
+<p><strong>Aesthetic fidelity (strict — most important rule of this clip):</strong> BP&#39;s body shape, silhouette, mass, and proportions must match the source painting EXACTLY in every frame. Do NOT add volume, weight, roundness, three-dimensional bulk, or anatomical mass beyond what is visible in the painted source. Do NOT anthropomorphize. Do NOT render the fire in a more &quot;realistic,&quot; photorealistic, or three-dimensional way than the painted source shows it — the fire stays in the same naive, flat, painted style at all sizes. No CG flame effects, no photoreal smoke, no glowing embers, no light bloom. The aesthetic-fidelity rules from the style prompt apply absolutely.</p>
+<p><strong>No other objects in the frame (strict):</strong> The rendered frame contains ONLY BP and the fire. Flat chroma-green everywhere else. NO ground, NO floor, NO landscape, NO sky, NO buildings, NO other people, NO objects being burned, NO smoke beyond what&#39;s painted in the style, NO embers, NO sparks, NO shadows. Just BP and the fire on green.</p>
+<p><strong>Cinematic framing — fire is centered (strict):</strong> The FIRE is centered horizontally in the frame for the entire clip. The center of the fire stays at (or very near) the horizontal center of the frame, even as the fire grows. BP is positioned to the LEFT of the fire — matching BP&#39;s position in the source painting. The fire never drifts left or right; it grows in place at the center.</p>
+<p><strong>Scale:</strong> Size is flexible; the user will rescale during compositing. The only constraint is that BP&#39;s full silhouette AND the fire at its LARGEST extent both remain fully visible inside the frame at all times — never cropped at any edge. Leave reasonable margin around the action, especially above the fire (since flames grow upward).</p>
+<p><strong>Movement timing (strict, 8-second clip):</strong></p>
+<ul>
+<li><strong>t=0.0 to t=0.5</strong> — establishing shot. BP stands to the LEFT of the frame&#39;s center, in their source-painting pose. The center of the frame is empty — no fire yet, just flat chroma-green where the fire will appear.</li>
+<li><strong>t=0.5 to t=1.5</strong> — BP lights the fire. BP makes a deliberate gesture toward the center (extending a hand, a flame, a torch, or whatever igniting element appears in the source painting). A SMALL flame appears at the center of the frame, in the painted style of the source. BP&#39;s body remains on the left.</li>
+<li><strong>t=1.5 to t=3.5</strong> — the fire grows steadily, in place at the center. Flames get taller and broader frame-by-frame, all in the painted style. BP watches from the left; BP is mostly still — a subtle bob, perhaps a small head turn toward the fire, but no walking yet.</li>
+<li><strong>t=3.5 to t=5.5</strong> — the fire grows OUT OF CONTROL. Flames become much larger, more chaotic, painted with broader strokes but STILL in the same naive painted style — not photoreal, not stylized differently. The fire is now significantly larger than at t=3.5. The fire&#39;s center stays anchored at the horizontal center of the frame; growth is upward and outward, not drifting sideways.</li>
+<li><strong>t=5.5 to t=7.0</strong> — BP STEPS BACK. BP moves leftward, away from the fire, by a small but clearly visible amount (roughly 5–10% of the frame&#39;s width). The motion is steady and deliberate, not panicked.</li>
+<li><strong>t=7.0 to t=8.0</strong> — held shot. The fire continues to rage at its largest scale, centered. BP, now slightly further left, looks PROUD at what they&#39;ve done — body posture upright (perhaps slightly puffed), head turned toward the fire, expression (within the painted face&#39;s constraints) reading as quietly satisfied or defiant. Hold this beat through to the final frame at t=8.0.</li>
+</ul>
+<p><strong>Fire behavior:</strong> The flames are rendered in the source painting&#39;s style — flat naive marks, painted edges, no photoreal smoke, glow, or embers. Flames flicker with hand-drawn imperfection (slight wobble between frames, matching the style prompt&#39;s frame-by-frame redraw aesthetic). The fire grows in size monotonically across the clip — it never shrinks, sputters, or jumps in scale. The base of the fire stays anchored at the horizontal center.</p>
+<p><strong>BP&#39;s actions:</strong></p>
+<ul>
+<li>t=0.5–1.5 — lighting motion: a deliberate gesture toward the center to ignite the fire. Match the leg-or-no-leg construction of the source.</li>
+<li>t=1.5–3.5 — observing: BP is mostly still, watching. Gentle vertical bob, small head movement.</li>
+<li>t=3.5–5.5 — still watching, possibly leaning back slightly as the fire grows but not yet stepping.</li>
+<li>t=5.5–7.0 — stepping back: leftward motion by ~5–10% of frame width, steady pace.</li>
+<li>t=7.0–8.0 — proud pose, held to the end of the clip.</li>
+</ul>
+<p><strong>Mood:</strong> Mischievous pride. BP has set something on fire and is satisfied with the outcome. Not menacing, not gleeful — quietly proud, like an artist standing back from their work. The closing held shot at t=7.0–8.0 carries the tone.</p>
+<p><strong>Camera:</strong> Completely static. No movement of any kind. No zoom, pan, dolly, tilt, parallax, or shake.</p>
+<p><strong>Duration:</strong> 8 seconds, exactly as timed above.</p>
+<div class="page-break"></div><h1>ThirdTimeaCharm — Animation Direction</h1>
+<p><strong>Subject:</strong> The Bubble Person (BP) from the source painting — bubble person with a halo behind their head, surrounded by hearts. Reproduce BP, the halo, and the hearts with absolute fidelity to the source painting: same line weight, same painted / pastel / watercolor / mixed-media marks, same flat naive construction, same dot eyes, same rough dark contour lines, same color choices, and SAME BODY SHAPE AND PROPORTIONS. The hearts are part of BP&#39;s world and stay close to BP throughout the clip.</p>
+<p><strong>Aesthetic fidelity (strict — most important rule of this clip):</strong> BP&#39;s body shape, silhouette, mass, and proportions must match the source painting EXACTLY in every frame. If the source shows BP as a flat painted shape with rough dark contour lines, BP REMAINS that exact flat shape with rough dark contour lines, in every frame, throughout the entire clip. Do NOT add volume, weight, roundness, three-dimensional bulk, fleshiness, or anatomical mass beyond what is visible in the painted source. Do NOT thicken, widen, plump, fatten, slim, stretch, or otherwise alter BP&#39;s body. Do NOT anthropomorphize — do NOT interpret BP&#39;s flat painted shape as a real human body and re-render it with realistic proportions, musculature, fleshiness, or dimensionality. This rule overrides any motion-related interpretation: BP does not &quot;fill out,&quot; lean, bend, twist, or become more rounded as they dance. The dance is expressed through gentle position and rotation of BP&#39;s existing painted silhouette, not through deformation of the silhouette. The aesthetic-fidelity rules from the style prompt (No upward refinement, No anthropomorphization or object recognition override) apply absolutely here.</p>
+<p><strong>No other objects in the frame (strict):</strong> The rendered frame contains ONLY BP, BP&#39;s halo, the hearts, and water splashes from BP&#39;s dance, on flat chroma-green. There is NO ground, NO floor, NO pool, NO container, NO horizon, NO sky, NO building, NO other person, NO shadow, NO objects of any kind beyond BP, the halo, the hearts, and the painted water splashes. The water itself is NOT rendered as a body of water — only the painted splashes BP throws up are visible. BP is suspended on flat green; nothing else is rendered. (The viewer&#39;s compositing software will add the water environment after the fact.)</p>
+<p><strong>Backstory (for performance only — do NOT render literally):</strong> BP is dancing joyfully in shallow water, third time&#39;s the charm — the hearts orbit BP in a happy swirl, and BP&#39;s footwork sends painted splashes into the air around them. BP is delighted.</p>
+<p><strong>Framing &amp; camera:</strong> A locked-off, dead-on cinematic shot looking straight at BP. The camera is static — no zoom, pan, dolly, tilt, parallax, or shake. The frame never moves.</p>
+<p><strong>Horizontal &amp; vertical position (strict — BP always fully visible):</strong> BP is CENTERED HORIZONTALLY AND VERTICALLY in the frame for the ENTIRE clip. BP&#39;s full silhouette — including the halo above their head and any feet/lower body shown in the source — is fully visible inside the frame at every single moment, never cropped at any edge. BP NEVER enters from any edge of the frame. BP NEVER exits any edge of the frame. BP NEVER drifts toward an edge. BP&#39;s position may shift gently within the central region of the frame from the dance motion, but the full body and halo always remain comfortably inside the frame with margin around them. The hearts and water splashes also stay within the frame — none of them fly off-screen.</p>
+<p><strong>Scale (strict):</strong> BP&#39;s full height (including halo) is approximately 50–60% of the frame&#39;s vertical height for the entire clip. BP does NOT grow or shrink. BP does NOT approach or retreat from the camera — there is no Z-axis movement. Leave generous chroma-green margin around BP, the hearts, and the splashes on all sides.</p>
+<p><strong>Movement (strict, 8-second clip):</strong></p>
+<ul>
+<li>BP dances in place, centered, for the full 8 seconds. The dance is a gentle, joyful, rhythmic motion — small side-to-side sway, a soft vertical bob, and a light rotational wobble. Roughly 1.5–2 cycles per second. The motion is steady and continuous, not frantic.</li>
+<li>BP does NOT travel across the frame. The center of BP&#39;s silhouette stays at the center of the frame.</li>
+<li>BP faces the camera (or near-faces) throughout. Match the painted BP&#39;s facing exactly.</li>
+<li>The dance is expressed through position and small rotation of BP&#39;s existing painted silhouette — NOT through limb articulation, body deformation, or anatomical movement that doesn&#39;t exist in the source painting.</li>
+<li>The halo behind BP&#39;s head moves with BP, attached to BP, in the same painted style.</li>
+</ul>
+<p><strong>Hearts (swirling around BP):</strong></p>
+<ul>
+<li>The hearts from the source painting swirl in a slow, continuous orbit around BP throughout the clip. They circle BP at roughly head-to-shoulder height in a loose, painterly arc.</li>
+<li>All hearts in the source remain present; none disappear, none multiply.</li>
+<li>The hearts stay in their ORIGINAL painted colors from the source — do NOT change their color.</li>
+<li>Each heart retains its painted shape, line weight, and naive flat construction at every moment. Do NOT render the hearts as three-dimensional, glossy, glowing, or CG-shaded objects.</li>
+<li>The orbit completes roughly 1–1.5 full revolutions over the 8 seconds — slow and steady, not whipping fast.</li>
+<li>Hearts stay within the frame at all times.</li>
+</ul>
+<p><strong>Water splashes (from BP&#39;s dance):</strong></p>
+<ul>
+<li>Painted water splash marks appear intermittently around BP&#39;s lower body as a result of the dance. They are rendered in the SAME naive painted style as the source — same line weight, same medium texture, same flat construction. They look like the artist quickly painted in a few splash marks with the same brush/pastel/watercolor tools used for BP.</li>
+<li>Splashes are sparse — not a continuous spray. Three or four small splash marks visible at any given moment, appearing and disappearing in rhythm with BP&#39;s bobs.</li>
+<li>Splash colors are drawn from the source painting&#39;s palette — predominantly the painting&#39;s blues and whites where water would naturally read. NO new colors. NO photorealistic water. NO CG droplets, NO refraction, NO transparency effects, NO light bloom.</li>
+<li>Splashes stay near BP&#39;s lower body — they do NOT fly across the frame or reach the hearts.</li>
+</ul>
+<p><strong>Mood:</strong> Joyful, light, charmed. The energy of &quot;third time&#39;s the charm&quot; — quiet delight, a small private celebration. BP is happy. The hearts are happy. The dance is unhurried.</p>
+<p><strong>Duration:</strong> 8 seconds, sustaining the centered dance with continuous heart orbit and intermittent painted splashes.</p>
+<div class="page-break"></div><h1>HalfPepperoniHalfCheese — Animation Direction</h1>
+<p><strong>Subjects:</strong> TWO bubble people (BP-pair) from the source painting — BP-A with a halo above their head, BP-B with a small heart on their torso. The pizza from the source painting (half pepperoni, half cheese) is the shared object. Reproduce both BPs and the pizza with absolute fidelity to the source painting: same line weight, same painted / pastel / watercolor / mixed-media marks, same flat naive construction, same dot eyes, same rough dark contour lines, same color choices, and SAME BODY SHAPES AND PROPORTIONS for each BP. The halo stays attached above BP-A&#39;s head; the heart stays attached to BP-B&#39;s torso.</p>
+<p><strong>Aesthetic fidelity (strict — most important rule of this clip):</strong> Both BPs&#39; body shapes, silhouettes, mass, and proportions must match the source painting EXACTLY in every frame. If the source shows the BPs as flat painted shapes with rough dark contour lines, they REMAIN flat painted shapes with rough dark contour lines, in every frame, throughout the entire clip. Do NOT add volume, weight, roundness, three-dimensional bulk, fleshiness, or anatomical mass beyond what is visible in the painted source. Do NOT thicken, widen, plump, fatten, slim, stretch, or otherwise alter either BP&#39;s body. Do NOT anthropomorphize — do NOT interpret the flat painted shapes as real human bodies and re-render them with realistic proportions, musculature, fleshiness, or dimensionality. Walking does NOT articulate believable legs or hips that aren&#39;t present in the source. The pizza stays in the same flat painted style — do NOT render it as a photoreal pizza, no glossy cheese, no three-dimensional crust, no steam, no melted-cheese stretch effects. The aesthetic-fidelity rules from the style prompt (No upward refinement, No anthropomorphization or object recognition override) apply absolutely here.</p>
+<p><strong>No vending machine. No other objects in the frame (strict — most critical rule for compositing):</strong> The vending machine is being composited in from a separate video. Veo MUST NOT render any vending machine, any kiosk, any cabinet, any door, any slot, any chute, any panel, any display, any buttons, any signage, any machinery of any kind, in any part of the frame at any moment of the clip. The frame contains ONLY: BP-A, BP-B, the halo above BP-A, the heart on BP-B&#39;s torso, and the pizza (only after it has been &quot;dispensed&quot; — see timing below). Everything else in the rendered frame is flat chroma-green. There is NO ground, NO floor, NO wall, NO counter, NO sidewalk, NO building, NO machine, NO sign, NO shadow, NO other person, NO objects of any kind beyond the BPs and the pizza. The BPs are suspended on flat green; nothing else is rendered.</p>
+<p><strong>Pizza appearance — &quot;dispensed&quot; without rendering the machine:</strong> The pizza is NOT visible at t=0. At its dispensed moment (see timing) the pizza enters the frame from off-screen RIGHT, moving leftward in a short, deliberate motion as if slid into the BPs&#39; grip from a chute beyond the right frame edge. It does NOT fade in. It does NOT pop into existence. It does NOT emerge from any rendered surface inside the frame. It travels into the frame from outside the right edge, and the BPs receive it together. From that moment onward, the pizza is held jointly by the BPs in roughly the same arrangement shown in the source painting.</p>
+<p><strong>Backstory (for performance only — do NOT render literally):</strong> The BPs are at a pizza vending machine (the machine is to their right, off-screen, not rendered). They wait, the pizza is dispensed to them, they take it together, then walk off to the right past the machine to enjoy it.</p>
+<p><strong>Framing &amp; camera:</strong> A locked-off, dead-on cinematic shot. The camera is static — no zoom, pan, dolly, tilt, parallax, or shake. The frame never moves.</p>
+<p><strong>Cinematic position — left-third rule of thirds (strict):</strong> The BP-pair is positioned with the visual center of the pair sitting on the LEFT vertical rule-of-thirds line — i.e. at approximately 33% of the frame width from the left edge. BP-A and BP-B stand close together side by side, their combined silhouette centered on that left-third line. The right two-thirds of the frame is empty chroma-green throughout the wait — that&#39;s the space where the vending machine will be composited later. Both BPs are fully inside the frame at every moment, never cropped at any edge except as described in the walk-off below.</p>
+<p><strong>Scale (strict):</strong> Each BP&#39;s full height (including BP-A&#39;s halo) is approximately 55–65% of the frame&#39;s vertical height. Both BPs stay this same size for the wait and dispense beats. Neither BP grows or shrinks. There is no Z-axis movement during the wait.</p>
+<p><strong>Movement timing (strict, 8-second clip):</strong></p>
+<ul>
+<li><strong>t=0.0 to t=2.5</strong> — BP-pair stands centered on the left-third line, facing slightly to the RIGHT (toward the off-screen vending machine). They idle gently — small natural sway, occasional glance. NO travel. The pizza is NOT in frame. The right two-thirds of the frame is empty chroma-green.</li>
+<li><strong>t=2.5 to t=3.5</strong> — The pizza enters the frame from off-screen RIGHT, traveling left along a roughly horizontal path at about chest height of the BPs, decelerating as it reaches them. The BPs reach toward it as it arrives. By t=3.5 the pizza is settled in their joint grip, held in front of them in the arrangement shown in the source painting.</li>
+<li><strong>t=3.5 to t=4.5</strong> — Brief held beat. The BPs hold the pizza and look at it (or at the camera) for a moment. No travel.</li>
+<li><strong>t=4.5 to t=8.0</strong> — The BPs walk off-screen to the RIGHT, carrying the pizza together. Their gait is unhurried and steady. They exit the right edge of the frame entirely by t=8.0. After they exit, the frame holds on empty chroma-green for the remaining moments. The pizza travels with the BPs and exits with them — it does NOT remain in frame after they leave.</li>
+</ul>
+<p><strong>Walk motion:</strong> Match the leg-or-no-leg construction shown in the source painting — each BP&#39;s legs (or lack of legs) appear exactly as they are painted. The walk is a gentle horizontal glide with a slight rhythmic vertical bob — small up-and-down oscillation timed like a relaxed walking cadence, roughly two bobs per second. The BPs walk together side by side, staying in close proximity to each other throughout the walk-off. Their relative position to each other does not change during the walk.</p>
+<p><strong>Pizza handling during walk-off:</strong> Both BPs hold the pizza jointly in front of them as they walk, in the same posture they had during the held beat. The pizza does NOT tilt, spin, deform, or change appearance. It stays a flat painted pizza, held level, the entire walk.</p>
+<p><strong>Mood:</strong> Quiet, anticipatory, then small satisfaction. Not theatrical. The energy of two friends getting a snack together — patient wait, simple delivery, calm exit.</p>
+<p><strong>Duration:</strong> 8 seconds, exactly as timed above.</p>
+<div class="page-break"></div><h1>GameOverShameOn — Animation Direction</h1>
+<p><strong>Subject:</strong> The Bubble Person (BP) from the source painting — bubble person with a small heart on their torso — and the arcade cabinet from the source painting. Reproduce BP and the arcade cabinet with absolute fidelity to the source painting: same line weight, same painted / pastel / watercolor / mixed-media marks, same flat naive construction, same dot eyes, same rough dark contour lines, same color choices, and SAME BODY SHAPE AND PROPORTIONS for BP. The arcade cabinet has the same wooden brown body, the same screen with painted yellow/orange flame-like content, the same control panel as in the source. The heart stays attached to BP&#39;s torso throughout.</p>
+<p><strong>Aesthetic fidelity (strict — most important rule of this clip):</strong> BP&#39;s body shape, silhouette, mass, and proportions must match the source painting EXACTLY in every frame. If the source shows BP as a flat painted shape with rough dark contour lines, BP REMAINS that exact flat shape with rough dark contour lines, in every frame, throughout the entire clip. Do NOT add volume, weight, roundness, three-dimensional bulk, fleshiness, or anatomical mass beyond what is visible in the painted source. Do NOT thicken, widen, plump, fatten, slim, stretch, or otherwise alter BP&#39;s body. Do NOT anthropomorphize — do NOT interpret BP&#39;s flat painted shape as a real human body and re-render it with realistic proportions, musculature, fleshiness, or dimensionality. The button-mashing and joystick play are expressed through small motions of BP&#39;s existing painted silhouette — NOT through articulated arms, hands, or fingers that aren&#39;t present in the source. The arcade cabinet stays in the same flat naive painted style — NO three-dimensional CG cabinet, NO photoreal wood grain, NO realistic plastic, NO modern LCD glow, NO scanlines, NO crisp pixel-art on the screen. The screen content stays in the same naive painted style as the source — painted brushy yellow/orange shapes that suggest fight-game action, NOT actual rendered video-game graphics. The aesthetic-fidelity rules from the style prompt (No upward refinement, No anthropomorphization or object recognition override) apply absolutely here.</p>
+<p><strong>No other objects in the frame (strict):</strong> The rendered frame contains ONLY BP and the arcade cabinet, on flat chroma-green. There is NO ground, NO floor, NO arcade carpet, NO neon signs, NO other arcade machines, NO walls, NO ceiling, NO other person, NO shadow, NO objects of any kind beyond BP and the cabinet. BP and the cabinet are suspended on flat green; nothing else is rendered. (The viewer&#39;s compositing software will add the arcade environment after the fact.)</p>
+<p><strong>Backstory (for performance only — do NOT render literally):</strong> BP is at the arcade playing a brutal early-1990s fighting game on this cabinet. They mash the controls, get into it, then lose. Game over, shame on BP.</p>
+<p><strong>Framing &amp; camera (strict — both subjects always fully in frame):</strong> A locked-off, dead-on cinematic shot. The camera is static — no zoom, pan, dolly, tilt, parallax, or shake. The frame never moves. BP and the entire arcade cabinet — including the top of the cabinet, the screen, the control panel, and the bottom of the cabinet body — are FULLY visible inside the frame at every single moment of the clip. NEITHER subject is ever cropped at any edge. NOTHING significant happens off-camera. Leave comfortable chroma-green margin around both BP and the cabinet on all sides.</p>
+<p><strong>Composition (strict):</strong> Match the source painting&#39;s arrangement — BP stands on the LEFT side of the frame, the arcade cabinet sits on the RIGHT side of the frame, BP&#39;s body angled slightly toward the cabinet so they can reach the controls. Both subjects are sized so each occupies roughly 55–65% of the frame&#39;s vertical height. They are close enough together that BP can interact with the cabinet&#39;s control panel (BP&#39;s hand-area near the controls), but not overlapping in a way that hides either&#39;s silhouette.</p>
+<p><strong>Position (strict):</strong> BP does NOT travel across the frame. BP stays planted to the left of the cabinet for the entire clip. The arcade cabinet is locked in place — it does NOT move, slide, tilt, or shift in the frame at any time. The cabinet is a fixed, anchored object.</p>
+<p><strong>Movement timing (strict, 8-second clip):</strong></p>
+<ul>
+<li><strong>t=0.0 to t=2.0</strong> — BP is mid-game, leaning slightly toward the cabinet, energetic button-mashing motion. Small rapid bobs of BP&#39;s silhouette as if hammering buttons. The cabinet screen shows painted fight-game action — the yellow/orange brushy shapes shift and flicker subtly as if a fight is in progress. BP is intent on the game.</li>
+<li><strong>t=2.0 to t=4.5</strong> — Play continues. BP&#39;s bobbing intensifies briefly during a peak moment, with a small forward lean. The screen content keeps shifting — painted strokes of yellow, orange, and red move across the screen in the source&#39;s painted style.</li>
+<li><strong>t=4.5 to t=5.5</strong> — A losing beat. BP&#39;s motion slows. The screen content collapses — painted strokes settle into a darker, more static composition. By t=5.5 the screen has resolved into the painted words &quot;GAME OVER&quot; rendered in the same naive painted style as everything else (rough hand-painted letters, palette drawn from the source — same yellows, oranges, and dark browns; NO crisp digital typography, NO neon glow).</li>
+<li><strong>t=5.5 to t=8.0</strong> — Held defeat. BP slumps slightly — head tilts down, body posture sags within the constraints of the painted silhouette (NO new anatomy added, just a small downward tilt of the existing shape). BP stops mashing. The &quot;GAME OVER&quot; stays on the screen, painted and still, until the end of the clip.</li>
+</ul>
+<p><strong>Button-mashing motion:</strong> Match the leg/arm/no-leg/no-arm construction shown in the source painting — BP&#39;s limbs (or lack of limbs) appear exactly as they are painted. The mashing reads as small rapid vertical/horizontal oscillations of BP&#39;s silhouette and any painted arm-region near the cabinet&#39;s controls. Do NOT invent fingers, hands, or articulated arm movement that isn&#39;t visible in the source painting. The motion is conveyed through the existing painted shapes.</p>
+<p><strong>Audio (Mortal Kombat II–inspired, generic arcade-fighting style):</strong></p>
+<ul>
+<li>Driving early-1990s arcade fighting game soundtrack — brassy synth-and-percussion loop, mid-tempo, slightly menacing, played at moderate volume underneath everything else. Lo-fi 16-bit arcade fidelity, NOT modern hi-fi production.</li>
+<li>Digital arcade button-press clicks and joystick clacks throughout t=0.0–4.5, in rhythm with BP&#39;s mashing — quick, dry, plasticky.</li>
+<li>Digital punch and kick impact effects — short, crunchy, lo-fi 16-bit &quot;thwack&quot; / &quot;smack&quot; sounds — sprinkled across t=0.0–4.5 to suggest the fight on screen.</li>
+<li>A gravelly, dramatic male announcer voice delivers short phrases — early-1990s arcade-fighting-game announcer style. Acceptable phrases: &quot;Round One,&quot; &quot;Fight,&quot; at the very start (t=0.0–0.5); a low growled &quot;Game Over&quot; at t=5.0–5.5 timed with the screen change.</li>
+<li>Arcade ambient electrical hum at low level throughout.</li>
+<li>A small disappointed BP sigh or low groan at t=6.0–7.0 during the slump — soft, brief, painted-character-level cartoonish, not a realistic human voice.</li>
+<li>NO copyrighted music. NO directly quoted catchphrases beyond the generic ones above. NO modern game audio.</li>
+</ul>
+<p><strong>Mood:</strong> Tragicomic arcade defeat. Energetic and mash-y up front, then a small absurd slump. The painted naive style keeps it from being grim — it&#39;s a tiny ridiculous loss. &quot;Game over, shame on&quot; reads as quiet, comic embarrassment.</p>
+<p><strong>Duration:</strong> 8 seconds, exactly as timed above, with synchronized audio.</p>
+<div class="page-break"></div><h1>Multi-source — axe-vs-chair (CarefulwithThatAx destroys TheChairisAgainsttheWall)</h1>
+<p>Reference image 1: <strong>CarefulwithThatAx.png</strong> — BP-A, the axe-wielding bubble person.
+Reference image 2: <strong>TheChairisAgainsttheWall.png</strong> — BP-B, the bubble person whose chair this is, with hearts hovering above the chair.</p>
+<hr>
+<p><strong>Subjects (TWO distinct bubble people, plus a chair and hearts from reference 2):</strong></p>
+<ul>
+<li><strong>BP-A</strong> is the axe-wielding bubble person from reference image 1 (CarefulwithThatAx). Reproduce BP-A with absolute fidelity to that source: the axe stays in BP-A&#39;s hand throughout the clip; body shape, proportions, painted marks, contour lines, and dot eyes match the source.</li>
+<li><strong>BP-B</strong> is the bubble person from reference image 2 (TheChairisAgainsttheWall). Reproduce BP-B with absolute fidelity to that source: body shape, proportions, painted marks, contour lines, and dot eyes match the source.</li>
+<li><strong>The chair</strong> is the chair painted in reference image 2 — same shape, same painted style, same colors. The chair is the central focal object of the clip.</li>
+<li><strong>The hearts</strong> are the heart shapes painted ABOVE the chair in reference image 2 — same shape, same painted style, in their ORIGINAL painted colors at t=0 (not black).</li>
+</ul>
+<p>These are TWO DISTINCT CHARACTERS plus the chair and hearts. They must NOT be blended. BP-A keeps the axe; BP-B does NOT have an axe. BP-B is associated with the chair and hearts; BP-A is not. Each character retains the visual identity from its own source painting. Do NOT swap props between them.</p>
+<p><strong>Aesthetic fidelity (strict — most important rule of this clip):</strong> Both BPs&#39; body shapes, silhouettes, mass, and proportions must match their respective source paintings EXACTLY in every frame. If the source shows a BP as a slim flat painted shape with rough dark contour lines, that BP REMAINS a slim flat shape with rough dark contour lines, in every frame, throughout the entire clip. Do NOT add volume, weight, roundness, three-dimensional bulk, fleshiness, or anatomical mass beyond what is visible in the painted source. Do NOT thicken, widen, plump, fatten, or otherwise inflate either BP&#39;s body. Do NOT anthropomorphize — do NOT interpret either BP&#39;s flat painted shapes as a real human body and re-render them with realistic proportions, musculature, fleshiness, or dimensionality. This rule overrides any motion-related interpretation: neither BP &quot;fills out&quot; or becomes more rounded as they walk, swing, recoil, or slump. The axe-swing windup does NOT broaden BP-A&#39;s torso or shoulders; the dismay slump does NOT add mass to BP-B. The chair, hearts, and axe are rendered in the same painted style as their source paintings — same line weight, same painted / pastel / watercolor / mixed-media marks, same flat naive construction. Do NOT render the chair, hearts, or axe in a more &quot;realistic&quot; or three-dimensional way than the source paintings show them. The aesthetic-fidelity rules from the style prompt (No upward refinement, No anthropomorphization or object recognition override) apply absolutely here.</p>
+<p><strong>No other objects in the frame (strict):</strong> The rendered frame contains ONLY BP-A, BP-B, the chair, the hearts above the chair, and the axe held by BP-A. Flat chroma-green everywhere else. NO walls (the title &quot;The Chair is Against the Wall&quot; is metaphorical — do NOT render an actual wall), NO ground, NO floor, NO landscape, NO sky, NO other people, NO shadows, NO blood, NO additional objects.</p>
+<p><strong>Cinematic framing — all action centered (strict):</strong> The chair sits CENTERED in the frame for the entire clip. BP-A and BP-B are positioned on either side of the chair, with all action confined to the central region of the frame. The approach, the swing, the destruction, the reaction — all of it happens in the center. Nothing of significance happens near the frame edges.</p>
+<p><strong>Scale (flexible):</strong> The user will rescale the output during compositing, so size is not a primary concern. The only requirement is that the full silhouettes of BP-A, BP-B, the axe, the chair, and ALL of the hearts remain fully visible inside the frame at all times — never cropped at any edge. Leave a reasonable margin of empty chroma-green around the action.</p>
+<p><strong>Movement timing (strict, 8-second clip):</strong></p>
+<ul>
+<li><strong>t=0.0 to t=1.0</strong> — Establishing shot. The chair sits centered. BP-B stands close beside the chair (to its right), looking at it lovingly or proudly. The hearts float ABOVE the chair, in their ORIGINAL painted colors (NOT black). BP-A is entering the frame from the LEFT, holding the axe, walking deliberately toward the chair.</li>
+<li><strong>t=1.0 to t=3.0</strong> — BP-A continues approaching the chair. BP-B notices BP-A&#39;s approach; BP-B&#39;s body language begins to shift from affection toward apprehension or alarm.</li>
+<li><strong>t=3.0 to t=4.5</strong> — BP-A reaches the chair (now just to the LEFT of the chair, with BP-B still on the right). BP-A raises the axe overhead, both hands on the handle. BP-B recoils slightly or freezes in alarm.</li>
+<li><strong>t=4.5 to t=5.0</strong> — BP-A swings the axe DOWN onto the chair. The axe strikes the chair.</li>
+<li><strong>t=5.0 to t=5.5</strong> — The chair breaks apart at the point of impact, splitting visibly. AT THE SAME MOMENT, the hearts above the chair change color — they shift from their original painted colors to fully BLACK. This is a deliberate, visible color change synchronized with the impact, not a slow fade.</li>
+<li><strong>t=5.5 to t=8.0</strong> — BP-B reacts in DISMAY. Body slumps. Head tilts down or shakes slowly. The painted face (within the constraints of its painted features) reads as devastated and mournful. BP-A stands over the broken chair with the axe now lowered, motionless. The hearts remain BLACK and continue to hover above the wreckage. Held shot, sustained mood, through to the end of the clip at t=8.0.</li>
+</ul>
+<p><strong>Walk motion (BP-A&#39;s approach during t=0.0–3.0):</strong> Match the leg-or-no-leg construction of BP-A&#39;s source painting. Steady, unhurried, deliberate gait — gentle vertical bob, ~2 bobs per second. The axe is held in BP-A&#39;s hand for the entire walk.</p>
+<p><strong>Axe swing motion:</strong> Smooth, deliberate raise overhead during t=3.0–4.5. Then a single downward swing in the half-second t=4.5–5.0. Intentional and clean — not frantic, not multi-strike.</p>
+<p><strong>Chair destruction:</strong> At impact (t=5.0), the chair splits or breaks at the point where the axe strikes. Broken pieces separate but stay within the central area of the frame — they do NOT fly off-screen or scatter widely. After t=5.5 the wreckage settles and stays in place.</p>
+<p><strong>Hearts color change:</strong> The hearts are in their original painted colors from t=0 to t=5.0. At exactly the moment of impact (t=5.0–5.5), they transition to fully BLACK. This is a sharp, registered color change — NOT a fade, NOT a partial dimming, NOT additional black hearts replacing the originals. The same hearts simply shift from their original color to black. From t=5.5 onward, the hearts stay BLACK for the rest of the clip.</p>
+<p><strong>BP-B&#39;s dismay (final 2.5 seconds):</strong> Body slumps; shoulders drop. Head tilts downward or shakes slowly. Within the painted face&#39;s constraints, the expression reads as devastated and mournful. No dramatic gestures — quiet grief, not theatrical wailing. BP-B does not move from their position beside the (broken) chair.</p>
+<p><strong>Mood:</strong> Tragicomic. The action is violent but the painted style and naive characters keep it from being grim — it&#39;s a small absurd tragedy. BP-A is just doing the thing; BP-B is broken-hearted; the hearts mourn the chair. The closing held shot at t=5.5–8.0 carries the emotional weight.</p>
+<p><strong>Camera:</strong> Completely static. No movement of any kind. No zoom, pan, dolly, tilt, parallax, or shake.</p>
+<p><strong>Duration:</strong> 8 seconds, exactly as timed above.</p>
+</main>
+</body>
+</html>

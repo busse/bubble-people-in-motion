@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bubble People in Motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a fixed 1600×900 slide scaled to the window; every slide is a report page built from typed panels (output, prompt, feature, stats, observation, failure). */
+:root {
+  --stage: #d9dcd2;
+  --paper: #f6f7f1;
+  --panel: #ffffff;
+  --ink: #1b2019;
+  --muted: #5d6459;
+  --rule: #d5d9cc;
+  --key: #2b8748;
+  --key-soft: #e1efe4;
+  --prompt: #9a7317;
+  --prompt-soft: #f5ecd6;
+  --feature: #335c9e;
+  --feature-soft: #e2e9f5;
+  --observe: #85466f;
+  --observe-soft: #f2e4ed;
+  --fail: #a93c2a;
+  --fail-soft: #f6e2dd;
+  --stats: #1b2019;
+  --stats-soft: #e9ebe4;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Literata", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --stage: #0b0d0a; --paper: #151914; --panel: #1c211b; --ink: #e6e9e0; --muted: #9aa294; --rule: #2d3329;
+    --key: #5cbd78; --key-soft: #1d3324; --prompt: #d9ae4c; --prompt-soft: #352b15; --feature: #7fa3e0; --feature-soft: #1c2638;
+    --observe: #d08cba; --observe-soft: #33202d; --fail: #e2765f; --fail-soft: #3a211b; --stats: #e6e9e0; --stats-soft: #252b23;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --stage: #0b0d0a; --paper: #151914; --panel: #1c211b; --ink: #e6e9e0; --muted: #9aa294; --rule: #2d3329;
+  --key: #5cbd78; --key-soft: #1d3324; --prompt: #d9ae4c; --prompt-soft: #352b15; --feature: #7fa3e0; --feature-soft: #1c2638;
+  --observe: #d08cba; --observe-soft: #33202d; --fail: #e2765f; --fail-soft: #3a211b; --stats: #e6e9e0; --stats-soft: #252b23;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--stage); color: var(--ink); font: 400 16px/1.5 var(--body); overflow: hidden; }
+
+/* stage + scaling */
+.viewport { position: fixed; inset: 0 0 52px 0; overflow: hidden; }
+.deck { width: 1600px; height: 900px; position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%); }
+.slide { position: absolute; inset: 0; background: var(--paper); border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 36px 48px 26px; gap: 22px; }
+.slide:not(.active) { display: none; }
+
+/* slide chrome */
+.slide-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 24px; border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
+.kicker { font-family: var(--mono); font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); display: flex; gap: 14px; align-items: center; }
+.kicker .when { color: var(--ink); font-weight: 600; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 4px 0 0; line-height: 1.05; letter-spacing: -0.015em; text-wrap: balance; }
+h1 { font-size: 92px; }
+h2 { font-size: 46px; }
+.head-side { text-align: right; display: grid; gap: 4px; justify-items: end; }
+.slide-foot { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.body { min-height: 0; display: grid; gap: 18px; }
+
+/* panels */
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-height: 0; min-width: 0; }
+.tag { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 7px; }
+.tag::before { content: ""; width: 9px; height: 9px; border-radius: 2px; background: currentColor; }
+.t-output { color: var(--key); } .t-prompt { color: var(--prompt); } .t-feature { color: var(--feature); }
+.t-observe { color: var(--observe); } .t-fail { color: var(--fail); } .t-stats { color: var(--stats); }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.panel-head .aside { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.panel p { margin: 0; font-size: 17px; line-height: 1.5; }
+.panel ul { margin: 0; padding-left: 20px; display: grid; gap: 7px; font-size: 16.5px; line-height: 1.42; }
+.panel li::marker { color: var(--observe); }
+.panel.feature li::marker { color: var(--feature); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+code { font-family: var(--mono); font-size: 0.86em; background: var(--stats-soft); padding: 1px 5px; border-radius: 3px; }
+
+/* KPI tiles */
+.kpis { display: grid; gap: 12px; }
+.kpi { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.kpi b { font-family: var(--display); font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+.kpi span { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.kpi.bad b { color: var(--fail); }
+.kpi.good b { color: var(--key); }
+
+/* prompt quote */
+.quote { font-family: var(--body); font-style: italic; font-size: 16.5px; line-height: 1.45; border-left: 3px solid var(--prompt); padding: 4px 0 4px 14px; color: var(--ink); margin: 0; }
+.wordbar { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.wordbar .track { height: 8px; background: var(--prompt-soft); border-radius: 4px; overflow: hidden; }
+.wordbar .fill { height: 100%; background: var(--prompt); }
+
+/* commits */
+.commit { display: grid; grid-template-columns: 76px 64px minmax(0, 1fr); gap: 8px; font-size: 15px; line-height: 1.35; align-items: baseline; }
+.commit .sha { font-family: var(--mono); font-size: 13px; color: var(--feature); font-weight: 600; }
+.commit .at { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+/* failures */
+.fail-row { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 8px; font-size: 14.5px; line-height: 1.35; padding: 5px 9px; background: var(--fail-soft); border-radius: 4px; }
+.fail-row .mono { color: var(--fail); font-size: 12.5px; }
+
+/* clips */
+.clip { position: relative; background: #000; border-radius: 4px; overflow: hidden; }
+.clip video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.clip.land { aspect-ratio: 16 / 9; }
+.clip.port { aspect-ratio: 9 / 16; }
+.clip .cap { position: absolute; left: 8px; top: 8px; font-family: var(--mono); font-size: 12px; background: rgba(0,0,0,0.6); color: #fff; padding: 2px 7px; border-radius: 3px; }
+.clip .cap.std { background: var(--prompt); color: #000; }
+.take { display: grid; gap: 5px; min-width: 0; }
+.take .note { font-size: 14px; line-height: 1.35; color: var(--muted); }
+.source { display: grid; gap: 5px; align-content: start; }
+.source img { width: 100%; border-radius: 3px; display: block; }
+.source span { font-family: var(--mono); font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.outrow { display: grid; gap: 14px; align-items: start; min-height: 0; }
+
+/* chapter slide grid */
+.chapter-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; min-height: 0; }
+.chapter-side { display: grid; gap: 14px; align-content: start; min-height: 0; }
+
+/* charts */
+svg text { font-family: var(--mono); font-size: 13px; fill: var(--muted); }
+svg .ink { fill: var(--ink); }
+svg .gridline { stroke: var(--rule); stroke-width: 1; }
+
+/* diagram */
+.flow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; align-items: stretch; }
+.node { position: relative; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; margin-right: 26px; display: grid; gap: 6px; align-content: start; }
+.node:not(:last-child)::after { content: "→"; position: absolute; right: -24px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 20px; color: var(--muted); }
+.node:last-child { margin-right: 0; }
+.node b { font-family: var(--display); font-size: 20px; line-height: 1.15; }
+.node span { font-size: 14px; color: var(--muted); line-height: 1.35; }
+.node .mono { font-size: 12px; color: var(--feature); }
+
+/* toolbar */
+.toolbar { position: fixed; left: 0; right: 0; bottom: 0; height: 52px; display: flex; align-items: center; gap: 12px;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(16px, env(safe-area-inset-left, 0px));
+  background: var(--paper); border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 13px; }
+.toolbar button, .toolbar select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--rule); border-radius: 5px; padding: 6px 12px; cursor: pointer; }
+.toolbar button:hover { border-color: var(--ink); }
+.toolbar select { max-width: 46vw; }
+.progress { flex: 1; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.progress div { height: 100%; background: var(--key); transition: width 0.25s; }
+.counter { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 56px; text-align: right; }
+:focus-visible { outline: 2px solid var(--key); outline-offset: 2px; }
+a { color: var(--key); }
+@media (prefers-reduced-motion: reduce) { .progress div { transition: none; } }
+
+/* Part I additions */
+.divider { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; height: 100%; }
+.part-num { font-family: var(--mono); font-weight: 600; font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--key); }
+.divider-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.divider-strip img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 4px; background: var(--stats-soft); display: block; }
+.divider-strip img:nth-child(odd) { transform: translateY(-24px); }
+.part-chip { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; }
+.part-chip b { font-family: var(--display); font-size: 19px; }
+.part-chip span { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.take-grid { display: grid; grid-template-columns: 300px minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; min-height: 0; }
+.ev-grid { display: grid; gap: 10px; }
+.ev-tile { margin: 0; display: grid; gap: 5px; min-width: 0; }
+.ev-im { aspect-ratio: 1; border-radius: 4px; overflow: hidden; display: grid; place-items: center; background: var(--stats-soft); }
+.ev-im img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.ev-im.fill img { width: 100%; height: 100%; object-fit: cover; }
+.ev-tile figcaption { font-family: var(--mono); font-size: 11.5px; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.checker { background-color: #d9dbd3; background-image: conic-gradient(#c7cac0 25%, transparent 0 50%, #c7cac0 0 75%, transparent 0); background-size: 16px 16px; }
+.flag { outline: 2px dashed var(--fail); outline-offset: 2px; }
+.badge { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 6px; border-radius: 3px; color: #fff; }
+.badge.good { background: var(--key); } .badge.partial { background: var(--prompt); } .badge.fail { background: var(--fail); }
+.score-row { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 14px; align-items: center; }
+.score-row b { display: block; font-family: var(--display); font-size: 22px; }
+.score-row span { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.score-bar { display: flex; gap: 3px; height: 54px; }
+.score-bar span { display: flex; align-items: center; padding-left: 10px; font-family: var(--mono); font-size: 17px; color: #fff; overflow: hidden; white-space: nowrap; }
+.score-bar .g { background: var(--key); border-radius: 4px 0 0 4px; } .score-bar .p { background: var(--prompt); } .score-bar .f { background: var(--fail); border-radius: 0 4px 4px 0; }
+table.types { border-collapse: collapse; width: 100%; font-size: 16px; }
+table.types th, table.types td { text-align: left; padding: 9px 10px 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.types th { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+table.types .n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+table.types td.up { color: var(--key); font-weight: 600; }
+table.compare td { font-size: 15.5px; line-height: 1.35; }
+table.compare td.lab { font-family: var(--mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; width: 130px; }
+.cost-row { display: grid; grid-template-columns: 200px minmax(0, 1fr) 80px; gap: 14px; align-items: center; font-size: 16px; }
+.cost-row .mono { text-align: right; }
+.cost-track { height: 22px; background: var(--prompt-soft); border-radius: 3px; overflow: hidden; }
+.cost-track div { height: 100%; background: var(--prompt); min-width: 3px; }
+.cost-row.total { border-top: 1px solid var(--rule); padding-top: 12px; font-weight: 600; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .checker { background-color: #2a2f28; background-image: conic-gradient(#232822 25%, transparent 0 50%, #232822 0 75%, transparent 0); } }
+:root[data-theme="dark"] .checker { background-color: #2a2f28; background-image: conic-gradient(#232822 25%, transparent 0 50%, #232822 0 75%, transparent 0); }
+</style>
+</head>
+<body>
+<div class="viewport" id="viewport"><div class="deck" id="deck"></div></div>
+<nav class="toolbar" aria-label="Slide controls">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <button id="next" aria-label="Next slide">→</button>
+  <select id="jump" aria-label="Jump to slide"></select>
+  <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+  <span class="counter" id="counter"></span>
+  <a href="gallery.html">Scroll view</a>
+</nav>
+
+<script>
+(() => {
+  /* ---------- data ---------- */
+  const runs = [
+    // [day, "HH:MM", painting, ok, tier]
+    [7,"08:04","NeedsMoreHoison",0],[7,"08:05","NeedsMoreHoison",0],[7,"08:06","NeedsMoreHoison",0],[7,"08:06","NeedsMoreHoison",0],
+    [7,"08:07","NeedsMoreHoison",1],[7,"08:26","NeedsMoreHoison",0],[7,"08:26","NeedsMoreHoison",1],[7,"08:46","NeedsMoreHoison",0],
+    [7,"08:47","NeedsMoreHoison",1],[7,"08:57","NeedsMoreHoison",1],[7,"09:18","GetOnboardTheFunkyWagon",1],[7,"09:42","WheresMyDangKeys",0],
+    [7,"09:43","WheresMyDangKeys",1],[7,"09:56","WheresMyDangKeys",1],[7,"13:17","IHaveSomethingToTellYou",1],[7,"13:28","IHaveSomethingToTellYou",1],
+    [7,"17:30","axe-vs-chair",1],[7,"17:36","WhiteRabbit",0],[7,"17:38","WhiteRabbit",0],[7,"17:56","WhiteRabbit",1,"standard"],
+    [8,"08:57","axe-vs-chair",1],[8,"09:04","AttractedToLight",1],[8,"12:04","AttractedToLight",1],[8,"12:59","IHaveSomethingToTellYou",1],
+    [8,"13:05","ThirdTimeaCharm",1],[8,"13:09","IHaveSomethingToTellYou",0],[8,"13:11","IHaveSomethingToTellYou",1],[8,"13:25","HalfPepperoniHalfCheese",1],
+    [8,"13:37","GameOverShameOn",0],[8,"13:38","GameOverShameOn",1]
+  ];
+  const commitsOnTimeline = [[7,"08:21","7cc3f9e"],[7,"08:34","56dbba9"],[7,"09:31","d0d1e6d"],[7,"09:42","b5f41ed"],[7,"10:17","d289737"],[7,"17:19","a224c8a"],[7,"17:23","be5382c"],[8,"08:55","a4af919 · e916a3d · fdb573e"]];
+
+  const chapters = [
+    {
+      when: "Thu 7 May · 08:04–09:03", title: "NeedsMoreHoison: first light", sources: ["NeedsMoreHoison"],
+      takes: [["NeedsMoreHoison-20260507-080704","08:07","First clip the pipeline produced."],["NeedsMoreHoison-20260507-082644","08:26","Empty green final frame now required."],["NeedsMoreHoison-20260507-084705","08:47",""],["NeedsMoreHoison-20260507-085741","08:57","On the 424-word prompt."]],
+      stats: [["4","clips"],["6","failed"],["$9.60","spend"],["5:32","avg render"]],
+      prompt: { words: 424, from: 258, quote: "BP must be SMALL in the frame … no more than 33% of the frame’s total vertical height." },
+      commits: [["7cc3f9e","08:21","Initial pipeline: CLI, Gemini vision pre-pass, Veo 3.1 client, cost and activity logs"],["56dbba9","08:34","Tighten the NeedsMoreHoison prompt; ignore output/"]],
+      observe: ["Runs started before the first commit: the code was already working at 08:04.","Veo kept BP too large, so the prompt gained a hard 33% height cap and an empty last frame.","Four takes of one painting in an hour: iteration by re-rolling."],
+      fails: [["08:04","429 quota exceeded"],["08:05","503 high demand (again at 08:06)"],["08:06","400 durationSeconds sent as a string"],["08:26","503 high demand (again at 08:46)"]]
+    },
+    {
+      when: "Thu 7 May · 09:18", title: "GetOnboardTheFunkyWagon: retries", sources: ["GetOnboardTheFunkyWagon"],
+      takes: [["GetOnboardTheFunkyWagon-20260507-091811","09:18","First attempt succeeded."]],
+      stats: [["1","clip"],["0","failed"],["$2.40","spend"],["5:30","render"]],
+      prompt: { words: 753, quote: "Backstory (for performance only — do not render any of this literally): BP is unhoused, busking on the streets of San Francisco." },
+      commits: [["d0d1e6d","09:31","Vision call retries 503 / 429 / overloaded after 5, 15 and 30 s"]],
+      observe: ["The first “for performance only” backstory. It becomes a fixed section in every later prompt.","Movement is almost nil: weary, between songs. Mood replaces choreography.","The busker returns from the April guitar test, now keyable."],
+      fails: []
+    },
+    {
+      when: "Thu 7 May · 09:42–10:01", title: "WheresMyDangKeys: the bus that wasn’t supposed to be there", sources: ["WheresMyDangKeys"],
+      takes: [["WheresMyDangKeys-20260507-094359","09:43","A city bus at the right edge."],["WheresMyDangKeys-20260507-095614","09:56","After the rewrite: centred, no bus."]],
+      stats: [["2","clips"],["1","failed"],["$4.80","spend"],["5:29","avg render"]],
+      prompt: { words: 871, from: 710, quote: "There is NO bus, NO vehicle, NO other person, NO ground, NO sidewalk … BP is suspended on flat green." },
+      commits: [["b5f41ed","09:42","One Markdown log per run with the full prompt sent"],["d289737","10:17","Rewrite: no bus, centred, aesthetic-fidelity block"]],
+      observe: ["Mentioning an off-screen object was enough for Veo to draw it.","Start of the “No other objects (strict)” section that every later prompt carries.","Per-run logs make every later take traceable to its exact prompt."],
+      fails: [["09:42","Veo [14] high demand"]]
+    },
+    {
+      when: "Thu 7 May · 13:17–13:28", title: "IHaveSomethingToTellYou: two characters", sources: ["IHaveSomethingToTellYou"],
+      takes: [["IHaveSomethingToTellYou-20260507-131709","13:17","Studio-like backdrop, fuller bodies."],["IHaveSomethingToTellYou-20260507-132853","13:28","Flatter, closer to the painting."]],
+      stats: [["2","clips"],["0","failed"],["$4.80","spend"],["5:27","avg render"]],
+      prompt: { words: 919, quote: "Both BPs are VERY SMALL in the frame … like watching two travelers from across a field." },
+      commits: [["a224c8a","17:19","Add the prompt: two BPs walk in, turn back, look up"]],
+      observe: ["First painting with two characters, and both must stay in frame the whole clip.","Take one drifted toward a 3D, CG look; the prompt was edited seconds before take two.","Committed four hours after the runs, a pattern that grows on day two."],
+      fails: []
+    },
+    {
+      when: "Thu 7 May · 17:30 → Fri 8 May · 08:57", title: "Axe vs chair: two paintings, one clip", sources: ["CarefulwithThatAx","TheChairisAgainsttheWall"],
+      takes: [["multi-axe-vs-chair-20260507-173003","17:30","First multi-source clip; 527 s render."],["multi-axe-vs-chair-20260508-085720","8 May 08:57","With anti-fattening guards."]],
+      stats: [["2","clips"],["0","failed"],["$4.80","spend"],["7:11","avg render"]],
+      prompt: { words: 1232, quote: "Do NOT render an actual wall — the title “The Chair is Against the Wall” is metaphorical." },
+      commits: [["be5382c","17:23","src/multi/: up to 3 reference paintings in one Veo call"],["e916a3d","8 May","axe-vs-chair prompt with anti-fattening guards"]],
+      observe: ["The prompt rules out a literal wall: the painting’s title is a metaphor.","Characters inflated in take one; the guards ask for each BP’s slim, flat painted shape.","Multi-source renders ran slowest of all runs."],
+      fails: []
+    },
+    {
+      when: "Thu 7 May · 17:36–18:03", title: "WhiteRabbit: paying for standard", sources: ["WhiteRabbitWhiteRabbitWhiteRabbit"],
+      takes: [["WhiteRabbitWhiteRabbitWhiteRabbit-20260507-175657","17:56","Veo 3.1 standard tier.",true]],
+      stats: [["1","clip"],["2","failed"],["$4.80","spend"],["6:29","render"]],
+      prompt: { words: 889, quote: "The fire grows in size monotonically … flat naive marks, painted edges, no photoreal smoke, glow, or embers." },
+      commits: [["a4af919","8 May","Add the fire-wielding BP prompt"]],
+      observe: ["Quota ran out on the fast model at the end of day one.","The only standard-tier clip: twice the price, same 8 s at 4K.","Scale is now “flexible”: you rescale in Final Cut, so the prompt only guards against cropping."],
+      fails: [["17:36","429 quota (fast)"],["17:38","429 quota (fast)"]]
+    },
+    {
+      when: "Fri 8 May · 09:04–12:11", title: "AttractedToLight: composing for a background", sources: ["AttractedToLight"],
+      takes: [["AttractedToLight-20260508-090436","09:04","BP and the fish."],["AttractedToLight-20260508-120427","12:04","After the noon revision."]],
+      stats: [["2","clips"],["0","failed"],["$4.80","spend"],["6:15","avg render"]],
+      prompt: { words: 1342, quote: "The user will composite this over a moving hallway background and may rescale … NO hallway, NO walls." },
+      commits: [["8f93cf4","14 Oct","Prompt committed five months after it ran"]],
+      observe: ["Prompts now name the shot they will be composited into.","The longest prompt yet, revised just before the second take.","Nothing from day two reached git until 14 October."],
+      fails: []
+    },
+    {
+      when: "Fri 8 May · 12:59–13:16", title: "The escalator variant", sources: ["IHaveSomethingToTellYou"],
+      takes: [["IHaveSomethingToTellYou-20260508-125919","12:59","Handrails rendered anyway."],["IHaveSomethingToTellYou-20260508-131110","13:11","From behind, holding hands."]],
+      stats: [["2","clips"],["1","failed"],["$4.80","spend"],["5:37","avg render"]],
+      prompt: { words: 1636, quote: "Veo violated this in the prior take by rendering handrails … ABSOLUTELY NO escalator, NO handrail." },
+      commits: [["ea3b4c3","12:56*","--prompt flag: point any painting at an alternate direction"],["8f93cf4","13:09*","IHaveSomethingToTellYou-escalator.md"]],
+      observe: ["The flag was written three minutes before its first use.","The prompt now cites Veo’s last mistake by name.","The safety filter refused one rewrite; it cost nothing."],
+      fails: [["13:09","Safety filter refusal"]]
+    },
+    {
+      when: "Fri 8 May · 13:05–13:44", title: "Three paintings in forty minutes", paired: true, sources: ["ThirdTimeaCharm","HalfPepperoniHalfCheese","GameOverShameOn"],
+      takes: [["ThirdTimeaCharm-20260508-130523","13:05","Hearts and splashes."],["HalfPepperoniHalfCheese-20260508-132540","13:25","Two BPs, one pizza."],["GameOverShameOn-20260508-133822","13:38","BP and the arcade cabinet."]],
+      stats: [["3","clips"],["1","failed"],["$7.20","spend"],["5:38","avg render"]],
+      prompt: { words: 1138, quote: "Backstory: BP is at the arcade playing a brutal early-1990s fighting game … then lose. Game over, shame on BP." },
+      commits: [["8f93cf4","14 Oct","Three prompts, each written minutes before its run"]],
+      observe: ["Every prompt now follows the same skeleton: subject, fidelity, no other objects, backstory, scale, timing.","Each painting worked on its first billed take.","The arcade cabinet from the April test returns, now on green."],
+      fails: [["13:37","400 generateAudio unsupported"]]
+    }
+  ];
+
+  const growth = [
+    ["NeedsMoreHoison · v1",258,1],["NeedsMoreHoison",424],["GetOnboardTheFunkyWagon",753],["WheresMyDangKeys · v1",710,1],["WheresMyDangKeys",871],
+    ["IHaveSomethingToTellYou",919],["axe-vs-chair",1232],["WhiteRabbit",889],["AttractedToLight",1342],["escalator variant",1636],
+    ["ThirdTimeaCharm",1072],["HalfPepperoniHalfCheese",1138],["GameOverShameOn",1202]
+  ];
+  const spend = [2.4010,2.4010,2.4009,2.4010,2.4009,2.4012,2.4011,2.4012,2.4013,2.4024,4.8011,2.4018,2.4012,2.4012,2.4013,2.4011,2.4013,2.4014,2.4010];
+  const allPaintings = ["AllergicToGravity","AttractedToLight","CanIHaveMoreScreentime","CarefulwithThatAx","ComeOutsideLookAtTheStars","DaddyDaughterDance","DoIGetaParticipationTrophy","GameOverShameOn","GetOnboardTheFunkyWagon","HalfPepperoniHalfCheese","HangTheMoon","HouseofLove","IHaveSomethingToTellYou","ILoveThisone","IfIToldYouOnceIveToldYouThreeTimes","ImHerefortheBOGO","ItsaBrandNewDay","JustAskDeputyBeans","KneeHighbytheFourthofJuly","LetsHuntforGhostCrabs","LookAtWhatTheCatDraggedIn","NeedsMoreHoison","OneDay","PotatoPotahto","SheLovesMeSheLovesMeNot","ShouldHaveGoneWithTheSprayTan","SneakySneakyLookAtMyPinky","ThatWasSupposedToBeEverything","ThatsANoBrainer","TheChairisAgainsttheWall","ThirdTimeaCharm","WaningorWaxing","WhenKeepingitRealGoesWrong","WheresMyDangKeys","WhiteRabbitWhiteRabbitWhiteRabbit","YeahWeAreKindofaMess","moonhalo"];
+
+  /* ---------- helpers ---------- */
+  const h = (tag, attrs = {}, ...kids) => {
+    const node = document.createElement(tag);
+    for (const [key, value] of Object.entries(attrs)) {
+      if (value == null || value === false) continue;
+      if (key === "class") node.className = value;
+      else if (key === "text") node.textContent = value;
+      else if (key === "style") node.style.cssText = value;
+      else node.setAttribute(key, value);
+    }
+    kids.flat(Infinity).forEach(kid => { if (kid != null && kid !== false) node.append(kid); });
+    return node;
+  };
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const s = (tag, attrs = {}, text) => {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+    if (text != null) node.textContent = text;
+    return node;
+  };
+  const tag = (kind, label) => h("span", { class: "tag t-" + kind, text: label });
+  const panel = (kind, label, aside, ...content) => h("section", { class: "panel " + kind },
+    h("div", { class: "panel-head" }, tag(kind, label), aside ? h("span", { class: "aside", text: aside }) : null), ...content);
+  const kpis = (items, columns) => h("div", { class: "kpis", style: `grid-template-columns: repeat(${columns}, minmax(0, 1fr))` },
+    items.map(([value, label, mood]) => h("div", { class: "kpi " + (mood || "") }, h("b", { text: value }), h("span", { text: label }))));
+  const bullets = items => h("ul", {}, items.map(text => h("li", { text })));
+  const clip = (src, poster, orientation, caption, standard) => h("div", { class: "clip " + orientation },
+    h("video", { "data-src": src, poster, muted: "", loop: "", playsinline: "", preload: "none" }),
+    caption ? h("span", { class: "cap" + (standard ? " std" : ""), text: caption }) : null);
+  const prodClip = (file, caption, standard) => clip(`media/prod/${file}.mp4`, `media/prod/${file}.jpg`, "land", caption, standard);
+  const source = name => h("figure", { class: "source", style: "margin:0" }, h("img", { src: `media/paint/${name}.jpg`, alt: "Source painting " + name }), h("span", { text: name }));
+
+  const slides = [];
+  const addSlide = (kicker, title, body, opts = {}) => slides.push({ kicker, title, body, ...opts });
+
+  /* ---------- slides ---------- */
+  /* ---------- Part I + bridge + epilogue helpers ---------- */
+  const dm = "media/decompose/";
+  const tile = ({ img, cap, badge, checker, flag, fill, ratio }) => h("figure", { class: "ev-tile" },
+    h("div", { class: "ev-im" + (checker ? " checker" : "") + (flag ? " flag" : "") + (fill ? " fill" : ""), style: ratio ? `aspect-ratio:${ratio}` : null }, h("img", { src: img, alt: cap })),
+    h("figcaption", {}, h("span", { text: cap }), badge ? h("span", { class: "badge " + badge, text: badge }) : null));
+  const tiles = (items, columns) => h("div", { class: "ev-grid", style: `grid-template-columns:repeat(${columns || items.length},minmax(0,1fr))` }, items.map(tile));
+  const commitList = rows => rows.map(([sha, at, text]) => h("div", { class: "commit" }, h("span", { class: "sha", text: sha }), h("span", { class: "at", text: at }), h("span", { text })));
+  const portClip = (src, poster, caption) => clip(src, poster, "port", caption);
+  // Take 5 per-character clips open on a title card; start them past it, including on each loop.
+  const skipIntro = (box, seconds = 1.5) => {
+    const video = box.querySelector("video");
+    video.addEventListener("loadedmetadata", () => { video.currentTime = seconds; });
+    video.addEventListener("timeupdate", () => { if (video.currentTime < seconds - 0.2) video.currentTime = seconds; });
+    return box;
+  };
+
+  const partDivider = (numeral, title, dates, statement, facts, stillImages) => addSlide(null, `Part ${numeral} · ${title}`,
+    h("div", { class: "divider" },
+      h("div", { style: "display:grid;gap:22px;align-content:center" },
+        h("div", { class: "part-num", text: "Part " + numeral }),
+        h("h1", { style: "font-size:84px", text: title }),
+        h("div", { class: "kicker", style: "font-size:16px", text: dates }),
+        h("p", { style: "font-size:24px;line-height:1.45;max-width:34ch;margin:0", text: statement }),
+        kpis(facts, facts.length)),
+      h("div", { class: "divider-strip" }, stillImages.map(src => h("img", { src, alt: "" }))))
+  , { bare: true });
+
+  const takeSlide = take => addSlide(`Part I · Take ${take.n} · ${take.date} · render ${take.render}`, take.title,
+    h("div", { class: "take-grid" },
+      h("div", { style: "display:grid;gap:8px;align-content:start" }, take.media, h("span", { class: "note mono", text: take.mediaCap })),
+      h("div", { style: "display:grid;gap:16px;align-content:start;min-height:0" },
+        panel("feature", "Approach", take.stack, h("p", { text: take.approach })),
+        take.evidence ? panel("output", "Evidence", take.evidence.aside, tiles(take.evidence.tiles, take.evidence.columns)) : null,
+        take.extra || null),
+      h("div", { class: "chapter-side" },
+        kpis(take.stats.map(([value, label, mood]) => [value, label, mood]), 2),
+        panel("observe", "Changes & observations", null, bullets(take.observe)),
+        panel("feature", "Commits", null, commitList(take.git))))
+  );
+
+  // ===== OPENING =====
+  addSlide("bubble people · project report · March – May 2026", null, h("div", { style: "display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center;height:100%" },
+    h("div", { style: "display:grid;gap:24px" },
+      h("h1", { text: "Bubble People in Motion" }),
+      h("p", { style: "font-size:23px;line-height:1.45;max-width:32ch;margin:0", text: "Two attempts, two repos, one goal: make the bubble people in 37 hand-painted works move without losing the hand that painted them." }),
+      h("div", { style: "display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px" },
+        h("div", { class: "part-chip" }, h("b", { text: "Part I · Take it apart" }), h("span", { text: "decompose-paintings · Python · 7–11 Mar · 6 takes · ~$12" })),
+        h("div", { class: "part-chip" }, h("b", { text: "Part II · Let a video model move it" }), h("span", { text: "bpd · TypeScript · 7–8 May · 30 runs · $48" }))),
+      kpis([["37","paintings"],["6","working days"],["~$60","API spend"],["2.1 GB","output, none in git"]], 4)),
+    h("div", { style: "display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end" },
+      skipIntro(portClip(dm + "take4.mp4", dm + "take4.jpg", "Mar · take 4"), 2),
+      portClip(dm + "take6.mp4", dm + "take6.jpg", "Mar · take 6"),
+      portClip("media/test/Bubble_Person_Plays_Arcade_Game.mp4", "media/test/Bubble_Person_Plays_Arcade_Game.jpg", "Apr · Veo test"),
+      h("div", { style: "grid-column:1 / 4" }, prodClip("GameOverShameOn-20260508-133822", "May · bpd")))
+  ), { bare: true });
+
+  addSlide("Storage audit · both repos", "Git holds the recipe. Every frame lives outside it.", h("div", { style: "display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-content:start" },
+    panel("feature", "decompose-paintings · git", "10 commits", bullets(["Python packages: decompose, animate, cards, vivify","Six case studies and an API cost ledger","Paintings, images and video all ignored","3 commits on 7 Mar, then 7 on 14 Oct at 19:05"])),
+    panel("feature", "bpd · git", "14 commits", bullets(["TypeScript pipeline and its evolution","37 paintings as PNG (58 MB) and every prompt","30 run logs with the full Veo prompt","10 commits on 7–8 May, then 4 on 14 Oct at 19:26"])),
+    panel("fail", "Local only", "ignored", bullets(["decompose-paintings/output/: 1.8 GB of sprites, frames, cards and 6 take reels","bpd/output/: 19 clips at 4K, 337 MB","test-gemini-veo/: 3 clips; git sees an empty folder","Copies of takes, tests and 4K clips in iCloud 00 BP SHOW"])),
+    h("div", { style: "grid-column:1 / 3" }, panel("observe", "Observation", null, h("p", { text: "Both repos follow the same pattern: a burst of commits while the idea was new, then weeks of uncommitted work, then one batch commit on 14 October. Git keeps the code, but the dates come from file times, run logs and case studies." }))),
+    panel("stats", "Output by location", null, kpis([["1.8 GB","decompose"],["337 MB","bpd"],["0","video in git","bad"],["204 MB","iCloud copies"]], 2))
+  ));
+
+  const arc = s("svg", { viewBox: "0 0 1500 360", width: "100%" });
+  const start = Date.UTC(2026, 2, 1), dayX = (month, day) => 40 + ((Date.UTC(2026, month - 1, day) - start) / 86400000) * 18.6;
+  [[3,1,"1 Mar"],[3,15,"15 Mar"],[4,1,"1 Apr"],[4,15,"15 Apr"],[5,1,"1 May"],[5,15,"15 May"]].forEach(([m, d, label]) => {
+    arc.append(s("line", { class: "gridline", x1: dayX(m, d), x2: dayX(m, d), y1: 30, y2: 300 }));
+    arc.append(s("text", { x: dayX(m, d), y: 325, "text-anchor": "middle" }, label));
+  });
+  arc.append(s("rect", { x: dayX(3, 7), y: 70, width: dayX(3, 12) - dayX(3, 7), height: 40, rx: 4, fill: "var(--feature)" }));
+  arc.append(s("text", { x: dayX(3, 7), y: 58, class: "ink" }, "Part I · takes 1–6 · 7–11 Mar"));
+  arc.append(s("circle", { cx: dayX(4, 24), cy: 175, r: 9, fill: "var(--prompt)" }));
+  arc.append(s("text", { x: dayX(4, 24), y: 155, "text-anchor": "middle", class: "ink" }, "24 Apr · 3 Veo tests"));
+  arc.append(s("rect", { x: dayX(5, 7), y: 240, width: dayX(5, 9) - dayX(5, 7), height: 40, rx: 4, fill: "var(--key)" }));
+  arc.append(s("text", { x: dayX(5, 9) + 10, y: 266, class: "ink" }, "Part II · bpd · 7–8 May"));
+  [[3,7,"takes 1–3, cards"],[3,8,"takes 4–5"],[3,11,"take 6"]].forEach(([m, d, label], i) => arc.append(s("text", { x: dayX(m, d) + 2, y: 132 + i * 18 }, label)));
+  arc.append(s("text", { x: dayX(3, 20), y: 215 }, "six weeks: nothing on disk"));
+  arc.append(s("text", { x: dayX(4, 27), y: 215 }, "two weeks"));
+  addSlide("The arc", "Five days of takes, a long pause, two days of pipeline", h("div", { style: "display:grid;grid-template-rows:minmax(0,1fr) auto;gap:16px" },
+    panel("stats", "Activity, March to May 2026", "file times, case studies, run logs", arc),
+    h("div", { style: "display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px" },
+      panel("feature", "Part I · Take it apart", "Mar", h("p", { text: "Cut figures out with SAM2, then generate new frames with gpt-image-1, then rebuild figures from parts." })),
+      panel("prompt", "The pivot", "Apr", h("p", { text: "A video model moves the whole painting in one call. Nothing to cut, but nothing to key either." })),
+      panel("output", "Part II · Let a video model move it", "May", h("p", { text: "Veo 3.1 with the painting as reference, a written direction and a flat green background." })))
+  ));
+
+  // ===== PART I =====
+  partDivider("I", "Take it apart", "decompose-paintings · Python · 7–11 March 2026",
+    "Treat each painting as layers. Cut the bubble people out, then animate the pieces, then generate new frames when the pieces fall short.",
+    [["6","takes"],["294 → 394","elements graded"],["~$12","OpenAI spend"]],
+    [dm + "t2_bp_1.webp", dm + "t3_bp_1.webp", dm + "t4_frame4.jpg", dm + "t5_frame4.jpg", dm + "t6_body.webp"]);
+
+  addSlide("Part I · one character through every take", "Allergic To Gravity, six ways", h("div", { style: "display:grid;grid-template-rows:auto auto;gap:18px;align-content:start" },
+    panel("output", "Output", "same character, 7–11 March", tiles([
+      { img: "media/paint/AllergicToGravity.jpg", cap: "source", fill: true, ratio: "3/4" },
+      { img: dm + "t2_bp_1.webp", cap: "take 2 cut-out", badge: "partial", checker: true, ratio: "3/4" },
+      { img: dm + "t3_bp_1.webp", cap: "take 3 mask", badge: "good", checker: true, ratio: "3/4" },
+      { img: dm + "t4_frame4.jpg", cap: "take 4 frame 4", fill: true, ratio: "3/4" },
+      { img: dm + "t5_frame4.jpg", cap: "take 5 frame 4", fill: true, ratio: "3/4" },
+      { img: dm + "t6_body.webp", cap: "take 6 body", checker: true, ratio: "3/4" }], 6)),
+    h("div", { style: "display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px" },
+      panel("feature", "Takes 1–3 · cut", null, h("p", { text: "Find each element with GPT-4o, cut it with SAM2, score the cut." })),
+      panel("prompt", "Takes 4–5 · generate", null, h("p", { text: "Ask gpt-image-1 for new frames of the character, then lock identity to the painting." })),
+      panel("output", "Take 6 · rebuild", null, h("p", { text: "Regenerate each part from the source and move the parts in code." })))
+  ));
+
+  takeSlide({ n: 1, date: "Sat 7 Mar", render: "14:58", title: "Cut the painting into layers", stack: "GPT-4o · SAM2 · GrabCut",
+    media: portClip(dm + "take1.mp4", dm + "take1.jpg"), mediaCap: "Daddy Daughter Dance · take_1.mp4 · 0:35",
+    approach: "A five-stage CLI crops the kraft-paper border and asks GPT-4o Vision for boxes around every bubble person, heart, halo, belly and item. SAM2 or OpenCV GrabCut cuts each one out as a transparent PNG, with JSON recording where it came from. A separate animate package lifts the layers out one at a time.",
+    evidence: { aside: "source", columns: 3, tiles: [{ img: "media/paint/DaddyDaughterDance.jpg", cap: "Daddy Daughter Dance", fill: true, ratio: "3/4" }] },
+    stats: [["3","paintings"],["11","files, ~2,142 lines"],["$0.05","GPT-4o"],["0:35","reel"]],
+    observe: ["Run on 3 of 37 paintings and called a success.","Lifting a figure leaves a black hole where it stood.","Built with Claude Opus 4.6 in Cursor."],
+    git: [["83012d7","12:29","first commit"],["69de41f","16:37","take_1 & take_2"]] });
+
+  takeSlide({ n: 2, date: "Sat 7 Mar", render: "16:28", title: "Run everything, then grade it honestly", stack: "+ evaluator",
+    media: portClip(dm + "take2.mp4", dm + "take2.jpg"), mediaCap: "take_2.mp4 · 3:13",
+    approach: "All 37 paintings, plus an evaluator that scores each extraction for opacity, edge quality and fragmentation, and checks colour: a heart should contain red and a halo gold.",
+    evidence: { aside: "Allergic To Gravity", columns: 6, tiles: [
+      { img: dm + "t2_bp_1.webp", cap: "figure", badge: "partial", checker: true },
+      { img: dm + "t2_bp_1_halo.webp", cap: "halo", badge: "partial", checker: true },
+      { img: dm + "t2_bp_1_belly.webp", cap: "belly", badge: "fail", checker: true },
+      { img: dm + "t2_bp_1_heart.webp", cap: "heart", badge: "fail", checker: true },
+      { img: dm + "t2_bg_1.webp", cap: "moon", badge: "fail", checker: true },
+      { img: dm + "t2_other_1.webp", cap: "signature", badge: "fail", checker: true }] },
+    stats: [["294","elements"],["9%","good","good"],["55%","fail","bad"],["$0.55","GPT-4o"]],
+    observe: ["76% of failures were SAM2 masks broken into fragments.","Hearts went 0 for 29: the painted hearts are maroon and brown, not the red the check expected.","The evaluator turned “looks done” into a number."],
+    git: [["69de41f","16:37","take_1 & take_2, the last commit until October"]] });
+
+  takeSlide({ n: 3, date: "Sat 7 Mar", render: "18:00", title: "Clean masks, sprite-ready output", stack: "+ head/body split",
+    media: portClip(dm + "take3.mp4", dm + "take3.jpg"), mediaCap: "take_3.mp4 · 3:21 · sprite walk-off",
+    approach: "Masks keep their largest piece, close small holes and clip to their box. GPT-4o also returns a head box, facing and colours, so each character becomes full, head and body sprites in sprites.json with anchors and z-order, ready to walk off as a jointed figure.",
+    evidence: { aside: "Allergic To Gravity · dashed = false pass", columns: 6, tiles: [
+      { img: dm + "t3_bp_1.webp", cap: "figure", badge: "good", checker: true },
+      { img: dm + "t3_bp_1_body.webp", cap: "body", badge: "good", checker: true },
+      { img: dm + "t3_bp_1_head.webp", cap: "head", badge: "good", checker: true, flag: true },
+      { img: dm + "t3_bp_1_belly.webp", cap: "belly", badge: "good", checker: true },
+      { img: dm + "t3_bp_1_halo.webp", cap: "halo", badge: "good", checker: true },
+      { img: dm + "t3_bp_1_heart.webp", cap: "heart", badge: "fail", checker: true }] },
+    stats: [["394","elements"],["54%","good","good"],["15%","fail","bad"],["$0.70","GPT-4o"]],
+    observe: ["A head passes if its mask has more than 50 pixels.","GPT-4o put the head box in a generic centred spot, so this “good” head is mostly the moon.","The body sprite still has its head."],
+    git: [["f7d37a0","14 Oct","mask post-processing and selection"],["7f590e4","14 Oct","sprite-ready output with head/body split"],["9d31684","14 Oct","sprite walk-off video renderer"]] });
+
+  const scoreBar = (good, partial, fail) => h("div", { class: "score-bar" },
+    h("span", { class: "g", style: `width:${good}%`, text: Math.round(good) + "%" }),
+    h("span", { class: "p", style: `width:${partial}%`, text: Math.round(partial) + "%" }),
+    h("span", { class: "f", style: `width:${fail}%`, text: Math.round(fail) + "%" }));
+  const typeRows = [["Background element","13%","74%"],["Bubble person","11%","58%"],["Item","15%","55%"],["Halo","18%","48%"],["Belly","7%","48%"],["Heart","0%","10%"],["Head (new)","–","100%"],["Body (new)","–","98%"]];
+  addSlide("Part I · take 2 → take 3", "Good extractions went from 9% to 54%", h("div", { class: "chapter-grid", style: "grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)" },
+    h("div", { style: "display:grid;gap:16px;align-content:start" },
+      panel("stats", "Element quality", "scored automatically · good / partial / fail", h("div", { style: "display:grid;gap:22px" },
+        h("div", { class: "score-row" }, h("div", {}, h("b", { text: "Take 2" }), h("span", { text: "294 elements" })), scoreBar(8.5, 36.7, 54.8)),
+        h("div", { class: "score-row" }, h("div", {}, h("b", { text: "Take 3" }), h("span", { text: "394 elements" })), scoreBar(53.6, 31.5, 15)))),
+      panel("observe", "Observations", null, bullets(["Take 3 adds 100 head and body sprites that pass almost automatically.","The previous slide shows a “good” head that isn’t one: the score measures pixels, not meaning.","Hearts barely moved. The colour rule, not the masks, was wrong."]))),
+    panel("stats", "Good rate by element", "take 2 → take 3", h("table", { class: "types" },
+      h("thead", {}, h("tr", {}, h("th", { text: "Element" }), h("th", { class: "n", text: "Take 2" }), h("th", { class: "n", text: "Take 3" }))),
+      h("tbody", {}, typeRows.map(([label, a, b]) => h("tr", {}, h("td", { text: label }), h("td", { class: "n", text: a }), h("td", { class: "n up", text: b }))))))
+  ));
+
+  addSlide("Part I · side project · Sat 7 Mar · 19:43", "Collectable cards", h("div", { class: "take-grid" },
+    h("div", { style: "display:grid;gap:8px;align-content:start" }, h("img", { src: dm + "card_DaddyDaughterDance_1.jpg", alt: "Trading card for Daddy", style: "width:100%;border-radius:6px;display:block" }), h("span", { class: "note mono", text: "Daddy · Daddy Daughter Dance" })),
+    h("div", { style: "display:grid;gap:16px;align-content:start" },
+      panel("feature", "Approach", "cards package", h("p", { text: "Less than two hours after take 3, every extracted character became a trading card: the take 3 sprite, an AI-written name, and stats with a special ability." })),
+      panel("output", "Output", "5 of 54", tiles([
+        { img: dm + "card_AllergicToGravity_1.jpg", cap: "Floating Dreamer", fill: true, ratio: "5/7" },
+        { img: dm + "card_DaddyDaughterDance_2.jpg", cap: "Daughter", fill: true, ratio: "5/7" },
+        { img: dm + "card_CarefulwithThatAx_1.jpg", cap: "Guardian", fill: true, ratio: "5/7" },
+        { img: dm + "card_ComeOutsideLookAtTheStars_1.jpg", cap: "Star Gazer", fill: true, ratio: "5/7" },
+        { img: dm + "card_WheresMyDangKeys_1.jpg", cap: "Key Seeker", fill: true, ratio: "5/7" }], 5))),
+    h("div", { class: "chapter-side" },
+      kpis([["54","cards"],["0","case studies"]], 2),
+      panel("observe", "Observations", null, bullets(["The cut-outs were good enough to become a product before they were good enough to animate.","Key Seeker and Guardian return in May as WheresMyDangKeys and the axe-wielder.","Only the output folder’s timestamps date this work."])),
+      panel("feature", "Commits", null, commitList([["6ba3722","14 Oct","collectable card generator"]]))))
+  );
+
+  takeSlide({ n: 4, date: "Sun 8 Mar", render: "10:37", title: "Stop cutting, start generating", stack: "GPT-4o · gpt-image-1",
+    media: portClip(dm + "take4.mp4", dm + "take4.jpg"), mediaCap: "Allergic To Gravity · vivify clip · 6.8 s",
+    approach: "A new vivify package drops masking. GPT-4o studies each painting and writes four prompts, and gpt-image-1 paints each frame with the original painting as its reference.",
+    evidence: { aside: "Allergic To Gravity · frames 1–4", columns: 4, tiles: [
+      { img: dm + "t4_frame1.jpg", cap: "1 stir", fill: true }, { img: dm + "t4_frame2.jpg", cap: "2 wake", fill: true },
+      { img: dm + "t4_frame3.jpg", cap: "3 interact", fill: true }, { img: dm + "t4_frame4.jpg", cap: "4 flourish", fill: true }] },
+    extra: panel("prompt", "Prompt", "written by GPT-4o per character", h("p", { text: "Four beats per character: stirs, wakes, interacts, final flourish." })),
+    stats: [["16 / 208","frames"],["4","characters"],["$0.97","spend"],["GPT-4o","writes prompts"]],
+    observe: ["The approach changes here: from cutting pixels to generating new ones.","The OpenAI billing limit stopped the run at 16 frames.","By frame 4 the Floating Dreamer is a different, leaping figure."],
+    git: [["f8ee48b","14 Oct","generative coming-alive animation package"]] });
+
+  takeSlide({ n: 5, date: "Sun 8 Mar", render: "14:02", title: "Lock the identity to the painting", stack: "chained frames + scoring",
+    media: portClip(dm + "take5.mp4", dm + "take5.jpg"), mediaCap: "Allergic To Gravity · vivify clip · 6.8 s",
+    approach: "The painting becomes the only source of truth for who a character is. Take 5 builds an identity profile and a reference board, generates each frame from the one before it, scores every new frame against the last and retries any that drift.",
+    evidence: { aside: "reference board + frames 1–4", columns: 5, tiles: [
+      { img: dm + "t5_refboard.jpg", cap: "reference", fill: true }, { img: dm + "t5_frame1.jpg", cap: "1", fill: true },
+      { img: dm + "t5_frame2.jpg", cap: "2", fill: true }, { img: dm + "t5_frame3.jpg", cap: "3", fill: true }, { img: dm + "t5_frame4.jpg", cap: "4", fill: true }] },
+    stats: [["52","characters"],["156 / 156","transitions pass","good"],["$8.56","spend"],["6:54","reel, 122 MB"]],
+    observe: ["All 37 paintings finished, the first full run.","Characters stay recognisable but get smoother and flatter down the chain.","Built with GPT-5.3 Codex. Its notes suggest a video model next."],
+    git: [["f8ee48b","14 Oct","(same package as take 4)"]] });
+
+  takeSlide({ n: 6, date: "Wed 11 Mar", render: "10:58 · fixes 11:38", title: "Regenerate the parts, animate them in code", stack: "gpt-image-1 parts + code",
+    media: portClip(dm + "take6.mp4", dm + "take6.jpg"), mediaCap: "Allergic To Gravity · remediated clip · 8 s",
+    approach: "No chain. gpt-image-1 regenerates each part of a character from the painting as a transparent PNG, and code plays five beats: background fades, the item wiggles and is absorbed into the heart, the heart pulses, the character walks off.",
+    evidence: { aside: "regenerated parts · Daddy Daughter Dance stills", columns: 8, tiles: [
+      { img: dm + "t6_body.webp", cap: "body", checker: true }, { img: dm + "t6_head.webp", cap: "head", checker: true },
+      { img: dm + "t6_heart.webp", cap: "heart", checker: true }, { img: dm + "t6_halo.webp", cap: "halo", checker: true }, { img: dm + "t6_item.webp", cap: "item", checker: true },
+      { img: dm + "dd_1.jpg", cap: "dd 1", fill: true }, { img: dm + "dd_2.jpg", cap: "dd 2", fill: true }, { img: dm + "dd_3.jpg", cap: "dd 3", fill: true }] },
+    stats: [["5","paintings"],["30","parts"],["$1.23","spend"],["+$9.10","est. for all 37"]],
+    observe: ["Every part comes from the source, so nothing drifts.","Some body and head parts are under 15% transparent; painted background travels with them as ghosting.","Planned with GPT-5.2 Codex, fixed with Opus 4.6. The last take of Part I."],
+    git: [["323f670","14 Oct","case studies for takes 3–6 and the cost ledger"]] });
+
+  const costRows = [["Take 1 · analysis",0.05],["Take 2 · analysis",0.55],["Take 3 · re-analysis",0.70],["Take 4 · 16 frames",0.97],["Take 5 · 208 frames",8.56],["Take 6 · 30 parts",1.23]];
+  addSlide("Part I · cost", "About $12 of OpenAI calls", h("div", { class: "chapter-grid", style: "grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)" },
+    panel("stats", "Spend per take", "case-study/costs.md", h("div", { style: "display:grid;gap:16px" },
+      costRows.map(([label, value]) => h("div", { class: "cost-row" }, h("span", { text: label }), h("div", { class: "cost-track" }, h("div", { style: `width:${(value / 8.56) * 100}%` })), h("span", { class: "mono", text: "$" + value.toFixed(2) }))),
+      h("div", { class: "cost-row total" }, h("span", { text: "Total" }), h("span"), h("span", { class: "mono", text: "~$12.06" })))),
+    h("div", { class: "chapter-side" },
+      kpis([["$12.06","Part I"],["$0","SAM2, run locally"]], 2),
+      panel("observe", "Observations", null, bullets(["Generating images cost about 8× more than analysing paintings.","Take 5 alone is 71% of the bill.","Each session logged its own spend, a habit bpd kept in logs/cost.md."]))))
+  );
+
+  // ===== THE PIVOT =====
+  const tests = [["Bubble_People_Dance_and_Grow","Dance and grow"],["Bubble_Person_Plays_Arcade_Game","Arcade game"],["Bubble_Person_Plays_Guitar_Halo_Fades","Guitar, halo fades"]];
+  addSlide("The pivot · Fri 24 April 2026", "Six weeks later, a video model", h("div", { class: "chapter-grid", style: "grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)" },
+    panel("output", "Output", "Gemini Veo · 720×1280 · 8 s", h("div", { class: "outrow", style: "grid-template-columns:repeat(3,minmax(0,1fr))" },
+      tests.map(([file, label]) => h("div", { class: "take" }, clip(`media/test/${file}.mp4`, `media/test/${file}.jpg`, "port"), h("span", { class: "note", text: label }))))),
+    h("div", { class: "chapter-side" },
+      panel("prompt", "Take 5 notes, 8 Mar", null, h("blockquote", { class: "quote", text: "Optional next pass: add an experimental video-model path for A/B comparison against chained-image strategy." })),
+      panel("observe", "Changes & observations", null, bullets(["Three clips landed in decompose-paintings/test-gemini-veo/ with no code and no case study.","Veo moves the whole painting in one call: no masks, no chain, no drift between frames.","It also animates the paper and adds glow, so nothing can be keyed. bpd was built to fix exactly that."])),
+      panel("feature", "Requirements this set up", null, bullets(["Only the bubble people, on flat #00B140 green","Keep the painted style; add nothing","4K, so clips survive rescaling in Final Cut"]))))
+  );
+
+  // ===== PART II =====
+  partDivider("II", "Let a video model move it", "bpd · TypeScript · 7–8 May 2026",
+    "Give Veo 3.1 the painting as reference, describe the bubble person, write the action, and demand a flat green background.",
+    [["30","runs"],["19","4K clips"],["$48.03","Veo + Gemini"]],
+    ["media/prod/NeedsMoreHoison-20260507-080704.jpg", "media/prod/WheresMyDangKeys-20260507-095614.jpg", "media/prod/multi-axe-vs-chair-20260508-085720.jpg", "media/prod/WhiteRabbitWhiteRabbitWhiteRabbit-20260507-175657.jpg", "media/prod/GameOverShameOn-20260508-133822.jpg"]);
+
+  // 6. Architecture
+  addSlide("Part II · architecture", "The bpd pipeline", h("div", { style: "display:grid;grid-template-rows:auto auto;gap:18px;align-content:start" },
+    h("div", { class: "flow" },
+      [["Painting","input-img/*.png","One of 37 paintings, plus a sibling action prompt."],
+       ["Vision pass","src/vision.ts","Gemini 2.5 Flash lists each bubble person: pose, anatomy, accessories, position."],
+       ["Prompt assembly","src/prompt.ts","Style prompt + vision notes + action prompt + green-screen tail."],
+       ["Veo 3.1","src/veo.ts","Painting as reference image. 8 s, 3840×2160. Fast $2.40, standard $4.80."],
+       ["Logs","src/log.ts · cost.ts","Per-run Markdown with the full prompt; running spend register."],
+       ["Final Cut","output/*.mp4","Key out #00B140 and composite over a new background."]
+      ].map(([title, file, text]) => h("div", { class: "node" }, h("b", { text: title }), h("span", { class: "mono", text: file }), h("span", { text })))),
+    h("div", { style: "display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px" },
+      panel("prompt", "Locked green-screen tail", "194 words", h("blockquote", { class: "quote", text: "The entire background MUST be a single flat solid chroma-key green: hex #00B140. No gradients, no textures, no shadows … no vignette, no atmospheric haze." })),
+      panel("prompt", "Style prompt", "510 words", h("blockquote", { class: "quote", text: "Never increase the level of detail … If proportions are naive or distorted, preserve that distortion. The model must not “improve” the artwork." })),
+      panel("feature", "Added later", null, bullets(["Vision retries on transient errors","One log file per run","src/multi/: 2–3 paintings per clip","--prompt alternate directions","Prompts archive: md, html, pdf"])))
+  ));
+
+  // 3. Timeline
+  const timeline = s("svg", { viewBox: "0 0 1500 330", width: "100%" });
+  const hourX = hour => 120 + (hour - 8) * 135;
+  [8,9,10,11,12,13,14,15,16,17,18].forEach(hour => {
+    timeline.append(s("line", { class: "gridline", x1: hourX(hour), x2: hourX(hour), y1: 30, y2: 300 }));
+    timeline.append(s("text", { x: hourX(hour), y: 322, "text-anchor": "middle" }, String(hour).padStart(2, "0") + ":00"));
+  });
+  [[7, 90, "Thu 7 May"], [8, 220, "Fri 8 May"]].forEach(([day, y, label]) => {
+    timeline.append(s("text", { x: 0, y: y + 5, class: "ink" }, label));
+    timeline.append(s("line", { x1: hourX(8), x2: hourX(18), y1: y, y2: y, stroke: "var(--rule)", "stroke-width": 2 }));
+    const seen = {};
+    runs.filter(run => run[0] === day).forEach(([, time, , ok, tier]) => {
+      const [hh, mm] = time.split(":").map(Number);
+      const x = hourX(hh + mm / 60);
+      const key = Math.round(x / 9);
+      const stack = seen[key] = (seen[key] || 0) + 1;
+      const cy = y - 14 - (stack - 1) * 15;
+      timeline.append(s("circle", { cx: x, cy, r: 6.5, fill: ok ? (tier ? "var(--prompt)" : "var(--key)") : "var(--fail)" }));
+    });
+    commitsOnTimeline.filter(commit => commit[0] === day).forEach(([, time, sha]) => {
+      const [hh, mm] = time.split(":").map(Number);
+      const x = hourX(hh + mm / 60);
+      timeline.append(s("rect", { x: x - 1.5, y: y + 6, width: 3, height: 22, fill: "var(--feature)" }));
+    });
+  });
+  timeline.append(s("text", { x: hourX(16.15), y: 262, "text-anchor": "middle", class: "ink" }, "16:09 prompts archive"));
+  timeline.append(s("rect", { x: hourX(16.15) - 1.5, y: 226, width: 3, height: 22, fill: "var(--feature)" }));
+  const legend = h("div", { class: "mono", style: "display:flex;gap:22px;font-size:13px;color:var(--muted)" },
+    [["var(--key)","clip rendered, fast"],["var(--prompt)","clip rendered, standard"],["var(--fail)","failed run"],["var(--feature)","commit"]].map(([color, label]) =>
+      h("span", { style: "display:inline-flex;gap:7px;align-items:center" }, h("span", { style: `width:11px;height:11px;border-radius:50%;background:${color};display:inline-block` }), label)));
+  addSlide("Part II · timeline", "Two working days, thirty runs", h("div", { style: "display:grid;grid-template-rows:minmax(0,1fr) auto;gap:16px" },
+    panel("stats", "Pipeline runs and commits, 7–8 May", "local time", timeline),
+    legend
+  ));
+
+  // 7–15. Chapters
+  chapters.forEach((chapter, index) => {
+    const takeCount = chapter.takes.length;
+    const takeView = ([file, time, note, standard], sourceName) => h("div", { class: "take" },
+      sourceName ? h("div", { style: "display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;align-items:end" },
+        h("img", { src: `media/paint/${sourceName}.jpg`, alt: "Source painting " + sourceName, style: "width:100%;border-radius:3px;display:block" }),
+        h("span", { class: "mono", style: "font-size:11px;color:var(--muted);overflow-wrap:anywhere", text: sourceName })) : null,
+      prodClip(file, time, standard), note ? h("span", { class: "note", text: note }) : null);
+    let outputBody;
+    if (chapter.paired) {
+      outputBody = h("div", { class: "outrow", style: `grid-template-columns:repeat(${takeCount},minmax(0,1fr))` },
+        chapter.takes.map((take, i) => takeView(take, chapter.sources[i])));
+    } else {
+      const columns = takeCount === 1 ? 1 : takeCount === 2 ? 2 : takeCount;
+      const sourceWidth = chapter.sources.length > 1 ? 110 : takeCount > 2 ? 120 : 150;
+      outputBody = h("div", { class: "outrow", style: `grid-template-columns:${sourceWidth}px minmax(0,1fr)` },
+        h("div", { style: "display:grid;gap:10px" }, chapter.sources.map(source)),
+        h("div", { class: "outrow", style: `grid-template-columns:repeat(${columns},minmax(0,1fr));${takeCount === 1 ? "max-width:640px" : ""}` },
+          chapter.takes.map(take => takeView(take))));
+    }
+    const output = panel("output", "Output", takeCount + (takeCount === 1 ? " clip" : " clips") + " · 3840×2160 · 8 s", outputBody);
+    const words = chapter.prompt.words;
+    const promptPanel = panel("prompt", "Prompt", words.toLocaleString() + " words" + (chapter.prompt.from ? ` (from ${chapter.prompt.from})` : ""),
+      h("blockquote", { class: "quote", text: chapter.prompt.quote }),
+      h("div", { class: "wordbar" }, h("span", { text: "length" }), h("div", { class: "track" }, h("div", { class: "fill", style: `width:${(words / 1700) * 100}%` }))));
+    const featurePanel = panel("feature", "Features & commits", null, chapter.commits.map(([sha, at, text]) =>
+      h("div", { class: "commit" }, h("span", { class: "sha", text: sha }), h("span", { class: "at", text: at }), h("span", { text }))));
+    const statsRow = kpis(chapter.stats.map(([value, label]) => [value, label, label === "failed" && value !== "0" ? "bad" : label.startsWith("clip") ? "good" : ""]), 4);
+    const failPanel = chapter.fails.length ? panel("fail", "Failures", "not billed", chapter.fails.map(([time, why]) => h("div", { class: "fail-row" }, h("span", { class: "mono", text: time }), h("span", { text: why })))) : null;
+    const left = h("div", { style: "display:grid;gap:16px;align-content:start;min-height:0" }, output, statsRow, failPanel);
+    const right = h("div", { class: "chapter-side" }, promptPanel, featurePanel, panel("observe", "Changes & observations", null, bullets(chapter.observe)));
+    addSlide(`Part II · chapter ${index + 1} of ${chapters.length} · ${chapter.when}`, chapter.title, h("div", { class: "chapter-grid" }, left, right));
+  });
+
+  // 16. Prompt growth
+  const growthSvg = s("svg", { viewBox: "0 0 900 470", width: "100%" });
+  const gx = words => 230 + (words / 1800) * 620;
+  [0, 500, 1000, 1500].forEach(tick => {
+    growthSvg.append(s("line", { class: "gridline", x1: gx(tick), x2: gx(tick), y1: 18, y2: 455 }));
+    growthSvg.append(s("text", { x: gx(tick), y: 12, "text-anchor": "middle" }, tick.toLocaleString()));
+  });
+  growth.forEach(([label, words, early], index) => {
+    const y = 26 + index * 33;
+    growthSvg.append(s("text", { x: 220, y: y + 16, "text-anchor": "end", class: "ink" }, label));
+    growthSvg.append(s("rect", { x: gx(0), y: y + 4, width: gx(words) - gx(0), height: 18, rx: 2, fill: early ? "var(--prompt-soft)" : "var(--prompt)", stroke: early ? "var(--prompt)" : "none" }));
+    growthSvg.append(s("text", { x: gx(words) + 8, y: y + 18 }, words.toLocaleString()));
+  });
+  addSlide("Part II · prompts", "Directions grew sixfold as the failures taught them", h("div", { class: "chapter-grid", style: "grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)" },
+    panel("prompt", "Action prompt length", "words, in order of first run · outlined = earlier draft from git", growthSvg),
+    h("div", { class: "chapter-side" },
+      kpis([["258","first draft"],["1,636","longest"],["+704","style + tail on every call"]], 3),
+      panel("observe", "The skeleton that emerged", null, bullets(["Subject: who, and what they hold","Aesthetic fidelity: same shapes, no added volume","No other objects (strict)","Backstory, for performance only","Scale and margins for compositing","Movement timing, second by second"])),
+      panel("observe", "Why it grew", null, h("p", { text: "Nearly every new section answers something Veo did in an earlier take: a bus, a wall, handrails, inflated bodies, cropped heads." }))))
+  );
+
+  // 17. Failures
+  const failTypes = [["503 / [14] model under high demand", 5, "Retry with backoff, added in d0d1e6d"], ["429 quota exceeded", 3, "Wait, or switch to the standard tier"], ["400 bad request", 2, "Request fixes: durationSeconds type, generateAudio flag"], ["Safety filter refusal", 1, "Rephrase the prompt"]];
+  const failSvg = s("svg", { viewBox: "0 0 760 230", width: "100%" });
+  failTypes.forEach(([label, count], index) => {
+    const y = index * 56;
+    failSvg.append(s("text", { x: 0, y: y + 16, class: "ink" }, label));
+    failSvg.append(s("rect", { x: 0, y: y + 24, width: count * 120, height: 18, rx: 2, fill: "var(--fail)" }));
+    failSvg.append(s("text", { x: count * 120 + 10, y: y + 38 }, "×" + count));
+  });
+  addSlide("Part II · reliability", "Eleven failures, none billed", h("div", { class: "chapter-grid", style: "grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)" },
+    h("div", { style: "display:grid;gap:16px;align-content:start" },
+      kpis([["30","runs"],["19","rendered","good"],["11","failed","bad"],["63%","success rate"]], 4),
+      panel("fail", "Failures by cause", null, failSvg)),
+    h("div", { class: "chapter-side" },
+      panel("feature", "Fixes", null, failTypes.map(([label, , fix]) => h("div", { class: "commit", style: "grid-template-columns:minmax(0,1fr)" }, h("span", { style: "font-weight:600", text: label }), h("span", { class: "at", style: "font-size:13.5px", text: fix })))),
+      panel("observe", "Observations", null, bullets(["Six of the eleven came in the first hour, before retries existed.","Every failure stopped before Veo rendered, so none cost anything.","The pipeline can’t judge a take; picking the keeper stays a human call."]))))
+  );
+
+  // 18. Spend
+  const spendSvg = s("svg", { viewBox: "0 0 760 300", width: "100%" });
+  const sx = index => 50 + index * (690 / (spend.length - 1));
+  const sy = value => 270 - (value / 50) * 250;
+  [0, 10, 20, 30, 40, 50].forEach(tick => {
+    spendSvg.append(s("line", { class: "gridline", x1: 50, x2: 745, y1: sy(tick), y2: sy(tick) }));
+    spendSvg.append(s("text", { x: 40, y: sy(tick) + 4, "text-anchor": "end" }, "$" + tick));
+  });
+  let running = 0;
+  const points = spend.map((value, index) => { running += value; return [sx(index), sy(running), value > 3]; });
+  spendSvg.append(s("path", { d: `M${points[0][0]},${sy(0)} ` + points.map(([x, y]) => `L${x},${y}`).join(" ") + ` L${points.at(-1)[0]},${sy(0)} Z`, fill: "var(--key-soft)" }));
+  spendSvg.append(s("path", { d: "M" + points.map(([x, y]) => `${x},${y}`).join(" L"), fill: "none", stroke: "var(--key)", "stroke-width": 2.5 }));
+  points.forEach(([x, y, standard]) => spendSvg.append(s("circle", { cx: x, cy: y, r: standard ? 6 : 3.5, fill: standard ? "var(--prompt)" : "var(--key)" })));
+  spendSvg.append(s("text", { x: points.at(-1)[0] - 4, y: points.at(-1)[1] - 12, "text-anchor": "end", class: "ink" }, "$48.03"));
+  spendSvg.append(s("text", { x: 400, y: 296, "text-anchor": "middle" }, "billed clips, in order"));
+  addSlide("Part II · spend", "$48 for nineteen 4K clips", h("div", { class: "chapter-grid", style: "grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)" },
+    panel("stats", "Cumulative spend", "gold = standard tier", spendSvg),
+    h("div", { class: "chapter-side" },
+      kpis([["$2.40","fast clip"],["$4.80","standard clip"],["~3¢","all vision calls"],["5–9 min","per render"]], 2),
+      panel("observe", "Observations", null, bullets(["Veo is almost the entire bill: $0.30 per second at 4K fast, and 4K forces 8 seconds.","Iteration cost is per take, not per prompt edit, so the re-rolls of NeedsMoreHoison cost $9.60.","Only one standard-tier clip, bought when the fast quota ran out."]))))
+  );
+
+  // ===== EPILOGUE =====
+  const compareSlide = (painting, title, items, observe) => addSlide("Epilogue · one painting, both parts", title, h("div", { class: "chapter-grid", style: "grid-template-columns:minmax(0,2.4fr) minmax(0,1fr)" },
+    panel("output", "Output", painting, h("div", { class: "outrow", style: "grid-template-columns:120px 200px 200px minmax(0,1fr);align-items:end" },
+      h("figure", { class: "source", style: "margin:0" }, h("img", { src: `media/paint/${painting}.jpg`, alt: "Source painting" }), h("span", { text: "source" })),
+      items.map(([media, caption]) => h("div", { class: "take" }, media, h("span", { class: "note", text: caption }))))),
+    h("div", { class: "chapter-side" }, panel("observe", "Changes & observations", null, bullets(observe))))
+  );
+  compareSlide("AttractedToLight", "Attracted To Light: March vs May", [
+    [skipIntro(portClip(dm + "cmp_take5_AttractedToLight_bp_1.mp4", dm + "cmp_take5_AttractedToLight_bp_1.jpg", "8 Mar")), "Take 5: chained frames"],
+    [portClip(dm + "cmp_take6_AttractedToLight.mp4", dm + "cmp_take6_AttractedToLight.jpg", "11 Mar"), "Take 6: regenerated parts"],
+    [prodClip("AttractedToLight-20260508-120427", "8 May"), "bpd: Veo 3.1, green screen"]
+  ], ["March keeps the paper, the frame and the whole composition; May keeps only the character and the fish.","Take 6 shows the ghosting of parts that carry painted background with them.","May is the only one you can key and composite over a moving hallway, which was the point."]);
+  compareSlide("CarefulwithThatAx", "Careful With That Ax: March vs May", [
+    [skipIntro(portClip(dm + "cmp_take5_CarefulwithThatAx_bp_1.mp4", dm + "cmp_take5_CarefulwithThatAx_bp_1.jpg", "8 Mar")), "Take 5: chained frames"],
+    [portClip(dm + "cmp_take6_CarefulwithThatAx.mp4", dm + "cmp_take6_CarefulwithThatAx.jpg", "11 Mar"), "Take 6: regenerated parts"],
+    [prodClip("multi-axe-vs-chair-20260508-085720", "8 May"), "bpd: two paintings in one clip"]
+  ], ["In March this character was “Guardian,” a trading card.","Part I animated one painting at a time; Part II puts two characters from different paintings in one scene.","The May clip needed anti-fattening guards, the same drift toward rounder, smoother figures that take 5 showed."]);
+
+  const compareRows = [
+    ["Idea", "Take the painting apart, then move the parts", "Ask a video model for the motion, constrain it with words"],
+    ["Language", "Python", "TypeScript"],
+    ["Models", "GPT-4o, SAM2, gpt-image-1", "Gemini 2.5 Flash, Veo 3.1"],
+    ["Unit of work", "All 37 paintings per take", "One painting, one written direction"],
+    ["Output", "1080×1920 showcase reels", "3840×2160 clips on #00B140 for Final Cut"],
+    ["Time and spend", "3 days · ~$12", "2 days · $48"],
+    ["Main failure", "Masks, colour rules, identity drift", "Veo adds things: buses, walls, handrails, bulk"],
+    ["Record", "Case studies + cost ledger", "Per-run logs + cost register"]
+  ];
+  addSlide("Epilogue · synthesis", "Two parts, one problem", h("div", { class: "chapter-grid", style: "grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)" },
+    panel("stats", "Part I vs Part II", null, h("table", { class: "types compare" },
+      h("thead", {}, h("tr", {}, h("th", { text: "" }), h("th", { text: "I · Take it apart" }), h("th", { text: "II · Video model" }))),
+      h("tbody", {}, compareRows.map(([label, a, b]) => h("tr", {}, h("td", { class: "lab", text: label }), h("td", { text: a }), h("td", { text: b })))))),
+    h("div", { class: "chapter-side" },
+      panel("feature", "What carried over", null, bullets(["The 37 paintings and the goal: fidelity to the hand that made them","A vision pre-pass before generating anything","Logging every dollar and every run","Committing in a burst, then not at all"])),
+      panel("observe", "What changed", null, h("p", { text: "Part I fought to separate figure from paper and then to make the figure move. Part II let the model handle both and spent its effort on telling the model what not to do." }))))
+  );
+
+  // 19. Still on paper
+  const used = new Set(chapters.flatMap(chapter => chapter.sources));
+  const waiting = allPaintings.filter(name => !used.has(name));
+  addSlide("Next", "Twenty-six paintings still on the paper", h("div", { class: "chapter-grid", style: "grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)" },
+    panel("output", "Not yet animated", waiting.length + " of 37", h("div", { style: "display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px" },
+      waiting.map(name => h("img", { src: `media/paint/${name}.jpg`, alt: name, title: name, style: "width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:3px;display:block" })))),
+    h("div", { class: "chapter-side" },
+      panel("prompt", "Ready but unrun", null, h("p", { html: null, text: "prompts/multi/halo-meets-busker.md pairs the pho BP with the busker. It was written to test whether Veo keeps two characters distinct." })),
+      panel("observe", "Where the work points", null, bullets(["The prompt skeleton is stable enough to template.","Commit as you go: day two sat outside git for five months.","Clips need a home outside git; previews here are small copies of 2.1 GB of output."])),
+      panel("feature", "Also in this folder", null, h("p", {}, "The full text of every prompt: ", h("a", { href: "prompts-archive.html", text: "prompts archive" }), ". The same content as one long page: ", h("a", { href: "gallery.html", text: "scroll view" }), ".")))
+  ));
+
+  /* ---------- render ---------- */
+  const deck = document.getElementById("deck");
+  const jump = document.getElementById("jump");
+  slides.forEach((slide, index) => {
+    const head = slide.bare ? h("div") : h("header", { class: "slide-head" },
+      h("div", {}, h("div", { class: "kicker", text: slide.kicker }), h("h2", { text: slide.title })),
+      h("div", { class: "head-side" }));
+    const foot = h("footer", { class: "slide-foot" }, h("span", { text: "Bubble People in Motion · bpd" }), h("span", { text: `${index + 1} / ${slides.length}` }));
+    if (slide.bare) head.append(h("div", { class: "kicker", text: slide.kicker }));
+    deck.append(h("article", { class: "slide", id: "s" + (index + 1), "aria-roledescription": "slide", "aria-label": `${index + 1} of ${slides.length}` }, head, h("div", { class: "body" }, slide.body), foot));
+    jump.append(h("option", { value: index, text: `${index + 1}. ${slide.title || "Bubble People in Motion"}` }));
+  });
+
+  const slideEls = [...deck.children];
+  let current = 0;
+  const setVideos = (slideEl, active) => slideEl.querySelectorAll("video").forEach(video => {
+    if (active) {
+      if (!video.src) video.src = video.dataset.src;
+      video.muted = true;
+      video.play().catch(() => {});
+    } else video.pause();
+  });
+  const show = index => {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slideEls.forEach((el, i) => { const active = i === current; el.classList.toggle("active", active); setVideos(el, active); });
+    jump.value = current;
+    document.getElementById("counter").textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById("bar").style.width = `${((current + 1) / slides.length) * 100}%`;
+    try { history.replaceState(null, "", "#s" + (current + 1)); } catch (error) {}
+  };
+  const fit = () => {
+    const viewport = document.getElementById("viewport");
+    const scale = Math.min((viewport.clientWidth - 24) / 1600, (viewport.clientHeight - 24) / 900);
+    deck.style.transform = `translate(-50%, -50%) scale(${Math.max(scale, 0.1)})`;
+  };
+  document.getElementById("prev").addEventListener("click", () => show(current - 1));
+  document.getElementById("next").addEventListener("click", () => show(current + 1));
+  jump.addEventListener("change", () => show(Number(jump.value)));
+  document.addEventListener("keydown", event => {
+    if (event.target.tagName === "SELECT") return;
+    if (["ArrowRight","PageDown"," "].includes(event.key)) { event.preventDefault(); show(current + 1); }
+    if (["ArrowLeft","PageUp"].includes(event.key)) { event.preventDefault(); show(current - 1); }
+    if (event.key === "Home") show(0);
+    if (event.key === "End") show(slides.length - 1);
+  });
+  window.addEventListener("resize", fit);
+  const fromHash = Number((location.hash.match(/^#s(\d+)$/) || [])[1]);
+  fit();
+  show(fromHash ? fromHash - 1 : 0);
+})();
+</script>
+</body>
+</html>

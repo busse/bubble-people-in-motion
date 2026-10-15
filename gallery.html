@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bubble People in Motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; each chapter pairs the source painting with the chroma-key clip it produced, keyed to the commit that shipped it. */
+:root {
+  --paper: #ecede6;
+  --card: #f7f8f2;
+  --ink: #1c211b;
+  --muted: #5b6257;
+  --rule: #cdd1c4;
+  --key: #2f8a4c;
+  --key-soft: #dcebdf;
+  --gold: #9a7420;
+  --fail: #a63d2b;
+  --fail-soft: #f3e1dc;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Literata", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121511; --card: #1a1e18; --ink: #e7e9e1; --muted: #9ba293; --rule: #2c3229;
+    --key: #5cbd78; --key-soft: #1d3324; --gold: #d8ad4c; --fail: #e2765f; --fail-soft: #3a211b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121511; --card: #1a1e18; --ink: #e7e9e1; --muted: #9ba293; --rule: #2c3229;
+  --key: #5cbd78; --key-soft: #1d3324; --gold: #d8ad4c; --fail: #e2765f; --fail-soft: #3a211b;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font: 400 1rem/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 48px 96px; display: grid; gap: 64px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.08; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
+h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); }
+h3 { font-size: 1.2rem; }
+p { margin: 0; max-width: 66ch; }
+.mono, code { font-family: var(--mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+code { background: var(--key-soft); padding: 1px 5px; border-radius: 3px; }
+.eyebrow { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--key); }
+:focus-visible { outline: 2px solid var(--key); outline-offset: 2px; }
+
+/* header */
+header { display: grid; gap: 20px; }
+header .lede { font-size: 1.15rem; }
+.stats { display: flex; flex-wrap: wrap; gap: 12px 40px; padding-top: 8px; }
+.stat { display: grid; gap: 2px; }
+.stat b { font-family: var(--display); font-size: 1.9rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); }
+
+/* storage verdict */
+.verdict { display: grid; gap: 18px; border-top: 2px solid var(--ink); padding-top: 20px; }
+.stores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.store { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.store h3 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.store ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 0.92rem; }
+.pill { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; white-space: nowrap; }
+.pill.in { background: var(--key-soft); color: var(--key); }
+.pill.out { background: var(--fail-soft); color: var(--fail); }
+.verdict .note { font-size: 0.95rem; color: var(--muted); }
+
+/* phases */
+.phase { display: grid; gap: 24px; }
+.phase-head { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 24px; border-top: 2px solid var(--ink); padding-top: 18px; }
+.phase-head .when { display: grid; gap: 4px; align-content: start; }
+.phase-head .when b { font-family: var(--display); font-size: 2.4rem; line-height: 1; color: var(--key); }
+.phase-head .body { display: grid; gap: 10px; min-width: 0; }
+
+.reel { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.reel.test { grid-template-columns: repeat(auto-fill, minmax(180px, 220px)); }
+figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+figcaption { font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
+figcaption b { color: var(--ink); font-weight: 600; }
+
+.clip { position: relative; border-radius: 4px; overflow: hidden; background: #000; cursor: pointer; }
+.clip video { display: block; width: 100%; height: auto; aspect-ratio: 9 / 16; object-fit: cover; }
+.takes .clip video { aspect-ratio: 16 / 9; }
+.clip .play { position: absolute; left: 8px; bottom: 8px; font-family: var(--mono); font-size: 0.68rem; background: rgba(0,0,0,0.62); color: #fff; padding: 3px 7px; border-radius: 3px; pointer-events: none; }
+.clip.playing .play { opacity: 0; }
+
+/* chapters within phase 3 */
+.chapter { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 24px; }
+.chapter .rail { display: grid; gap: 6px; align-content: start; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); align-self: start; }
+.chapter .rail .time { font-family: var(--mono); font-size: 0.85rem; font-weight: 500; }
+.chapter .main { display: grid; gap: 16px; min-width: 0; border-left: 1px solid var(--rule); padding-left: 24px; }
+.commit { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 0.92rem; }
+.commit .sha { font-family: var(--mono); font-size: 0.78rem; color: var(--gold); }
+.commit.none .sha { color: var(--muted); }
+.commits { display: grid; gap: 6px; }
+
+.pair { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: start; }
+.pair.multi { grid-template-columns: 112px minmax(0, 1fr); }
+.sources { display: grid; gap: 8px; }
+.sources img { border-radius: 3px; width: 100%; height: auto; display: block; }
+.takes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 14px; min-width: 0; }
+.take-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.take-meta .std { color: var(--gold); }
+
+.fails { display: grid; gap: 6px; }
+.fail { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 10px; font-size: 0.85rem; padding: 6px 10px; background: var(--fail-soft); border-radius: 4px; }
+.fail .mono { color: var(--fail); }
+
+/* prompt growth chart */
+.chart { display: grid; gap: 14px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+.chart text.lbl { fill: var(--ink); }
+.chart .bar { fill: var(--key); }
+.chart .bar.early { fill: var(--gold); }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart-wrap { overflow-x: auto; }
+
+/* unanimated */
+.shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+.shelf figure img { border-radius: 3px; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; }
+.shelf figcaption { font-size: 0.68rem; font-family: var(--mono); overflow-wrap: anywhere; }
+
+footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; display: grid; gap: 6px; }
+
+@media (max-width: 760px) {
+  .stores { grid-template-columns: minmax(0, 1fr); }
+  .phase-head, .chapter { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .chapter .rail { position: static; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .chapter .main { border-left: 0; padding-left: 0; }
+  .pair { grid-template-columns: 76px minmax(0, 1fr); }
+  .takes { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">bpd · March to May 2026</span>
+    <h1>Bubble People in Motion</h1>
+    <p class="lede">How a folder of paintings became a Veo 3.1 pipeline that cuts bubble people out of the paper and sets them moving on chroma green, ready to key in Final Cut. Each clip sits beside the painting it came from and the commit that made it possible.</p>
+    <div class="stats">
+      <div class="stat"><b>28</b><span>clips across 3 phases</span></div>
+      <div class="stat"><b>30</b><span>pipeline runs</span></div>
+      <div class="stat"><b>11</b><span>failed, none billed</span></div>
+      <div class="stat"><b>$48.03</b><span>logged spend</span></div>
+      <div class="stat"><b>14</b><span>commits</span></div>
+    </div>
+  </header>
+
+  <section class="verdict" aria-labelledby="v-h">
+    <span class="eyebrow">Your hypothesis, checked</span>
+    <h2 id="v-h">Git holds the recipe. Every clip lives outside it.</h2>
+    <p>You were right about the binaries, with one twist: the paintings are large binaries too, and they are in git. What git doesn't hold is any video. <code>output/*.mp4</code> was ignored from the very first commit, and the two phases before the pipeline existed never touched this repo.</p>
+    <div class="stores">
+      <div class="store">
+        <h3>Git history <span class="pill in">tracked</span></h3>
+        <ul>
+          <li>All TypeScript source and its evolution</li>
+          <li>37 paintings as PNG (58 MB)</li>
+          <li>Every action prompt and the style prompt</li>
+          <li>30 run logs with the full Veo prompt sent</li>
+        </ul>
+      </div>
+      <div class="store">
+        <h3>This Mac only <span class="pill out">ignored</span></h3>
+        <ul>
+          <li><code>bpd/output/</code>: 19 clips at 3840×2160, 337 MB</li>
+          <li>Ignored by <code>.gitignore</code> since <span class="mono">7cc3f9e</span></li>
+        </ul>
+      </div>
+      <div class="store">
+        <h3>iCloud only <span class="pill out">no repo</span></h3>
+        <ul>
+          <li><code>00 BP SHOW/1-Vivifiy</code>: 6 takes, 197 MB</li>
+          <li><code>00 BP SHOW/2-Veo-test</code>: 3 clips, 6.7 MB</li>
+          <li><code>3-Veo-prod</code> mirrors <code>output/</code> (file sizes match)</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">Commit dates also mislead. Five prompts written and run on 8 May sat untracked until today’s commits on 14 October, so the timeline below uses run timestamps and file times, not commit dates. Clips here are 640 px previews; the 4K masters are unchanged.</p>
+  </section>
+
+  <section class="phase" aria-labelledby="p1">
+    <div class="phase-head">
+      <div class="when"><span class="eyebrow">Phase 1</span><b>Mar</b><span class="mono">7 – 11 Mar 2026</span></div>
+      <div class="body">
+        <h2 id="p1">Decomposing the paintings</h2>
+        <p>Six vertical 1080×1920 reels, 35 seconds to almost 7 minutes long, made by the earlier decompose-paintings project (Python, GPT-4o, SAM2, gpt-image-1). Takes 1–3 cut each bubble person out of the paper, often leaving a black silhouette where the figure was. From take 4 the approach switched to generating the parts, and the reels add collectable trading cards with names such as “Guardian” and “Star Gazer.” The <a href="index.html#s4">deck</a> tells this part in full.</p>
+        <p class="mono" style="color:var(--muted)">Previews show the first 20 seconds of each take.</p>
+      </div>
+    </div>
+    <div class="reel" id="reel-vivify"></div>
+  </section>
+
+  <section class="phase" aria-labelledby="p2">
+    <div class="phase-head">
+      <div class="when"><span class="eyebrow">Phase 2</span><b>Apr</b><span class="mono">24 Apr 2026</span></div>
+      <div class="body">
+        <h2 id="p2">First Veo tests</h2>
+        <p>Three 8-second clips at 720×1280, with the Veo watermark in the corner. Veo animates the whole painting, paper edge and all, so nothing can be keyed. The guitar busker and the arcade player in these tests come back a few weeks later as pipeline subjects.</p>
+      </div>
+    </div>
+    <div class="reel test" id="reel-test"></div>
+  </section>
+
+  <section class="phase" aria-labelledby="p3">
+    <div class="phase-head">
+      <div class="when"><span class="eyebrow">Phase 3</span><b>May</b><span class="mono">7 – 8 May 2026</span></div>
+      <div class="body">
+        <h2 id="p3">The bpd pipeline</h2>
+        <p>A TypeScript CLI. Gemini 2.5 Flash describes each bubble person in the painting, then that description, a shared style prompt, a hand-written action prompt and a locked green-screen tail go to Veo 3.1 with the painting as reference. Output is 8 seconds at 4K, the only length Veo allows at that resolution. A fast-tier clip costs $2.40 and takes 5 to 9 minutes.</p>
+      </div>
+    </div>
+    <div id="chapters" style="display:grid;gap:40px"></div>
+  </section>
+
+  <section class="chart" aria-labelledby="c-h">
+    <div class="phase-head">
+      <div class="when"><span class="eyebrow">Prompts</span><b>6×</b><span class="mono">longest vs first draft</span></div>
+      <div class="body">
+        <h2 id="c-h">Directions got longer as the failures taught them</h2>
+        <p>Words in each action prompt, in the order the paintings were first run. Gold bars are earlier drafts recovered from git. Every prompt is also wrapped in the 510-word style prompt and the 194-word green-screen tail. Most of the added words are guards against things Veo did in an earlier take: making figures rounder and fuller, rendering the scene meant for compositing, cropping heads.</p>
+      </div>
+    </div>
+    <div class="chart-wrap"><svg id="growth" viewBox="0 0 760 380" role="img" aria-label="Bar chart of action prompt word counts, rising from 258 words to 1,636 words"></svg></div>
+  </section>
+
+  <section class="phase" aria-labelledby="s-h">
+    <div class="phase-head">
+      <div class="when"><span class="eyebrow">Waiting</span><b>26</b><span class="mono">paintings</span></div>
+      <div class="body">
+        <h2 id="s-h">Still on the paper</h2>
+        <p>Paintings in <code>input-img/</code> with no action prompt yet. <code>prompts/multi/halo-meets-busker.md</code> is written but has no run.</p>
+      </div>
+    </div>
+    <div class="shelf" id="shelf"></div>
+  </section>
+
+  <footer>
+    <span>Sources: git log of <code>bpd</code> (14 commits), <code>logs/activity.md</code>, <code>logs/cost.md</code>, <code>logs/runs/*.md</code>, and files in <code>00 BP SHOW</code>. Spend is as logged by the pipeline, including about 3¢ of Gemini vision calls.</span>
+    <span>Click any clip to play or pause it. Full prompt text: <a href="prompts-archive.html">prompts archive</a>.</span>
+  </footer>
+</div>
+
+<script>
+const vivify = [
+  { n: 1, len: "0:35" }, { n: 2, len: "3:13" }, { n: 3, len: "3:21" },
+  { n: 4, len: "0:38" }, { n: 5, len: "6:54" }, { n: 6, len: "0:40" }
+];
+const tests = [
+  { f: "Bubble_People_Dance_and_Grow", t: "Bubble People Dance and Grow" },
+  { f: "Bubble_Person_Plays_Arcade_Game", t: "Bubble Person Plays Arcade Game" },
+  { f: "Bubble_Person_Plays_Guitar_Halo_Fades", t: "Bubble Person Plays Guitar, Halo Fades" }
+];
+
+const chapters = [
+  {
+    day: "Thu 7 May", time: "08:04 – 09:03", title: "NeedsMoreHoison: first light",
+    commits: [
+      ["7cc3f9e", "08:21", "feat: initial bubble-people video pipeline"],
+      ["56dbba9", "08:34", "chore: tighten action prompt for NeedsMoreHoison; ignore output/ dir"]
+    ],
+    text: "The first painting through the pipeline: a haloed bubble person carrying a bowl of pho, asked to walk in from the left and leave on the right. Six of its ten attempts failed, all before Veo rendered anything, so none were billed. Between takes the prompt grew from 258 to 424 words, mostly to keep BP small and make sure they leave the frame completely by the last frame.",
+    sources: ["NeedsMoreHoison"],
+    takes: [
+      ["NeedsMoreHoison-20260507-080704", "08:07", "fast", "First clip the pipeline ever produced."],
+      ["NeedsMoreHoison-20260507-082644", "08:26", "fast", "Prompt now requires an empty green final frame."],
+      ["NeedsMoreHoison-20260507-084705", "08:47", "fast", ""],
+      ["NeedsMoreHoison-20260507-085741", "08:57", "fast", "Fourth take, on the 424-word prompt."]
+    ],
+    fails: [
+      ["08:04", "429 quota exceeded"],
+      ["08:05", "503 model under high demand"],
+      ["08:06", "503 model under high demand"],
+      ["08:06", "400 from Veo: durationSeconds sent as a string, not a number"],
+      ["08:26", "503 model under high demand"],
+      ["08:46", "503 model under high demand"]
+    ]
+  },
+  {
+    day: "Thu 7 May", time: "09:18", title: "GetOnboardTheFunkyWagon: retries",
+    commits: [["d0d1e6d", "09:31", "feat: add GetOnboardTheFunkyWagon prompt and retry-on-transient for vision"]],
+    text: "After four 503s and a 429 in the first hour, the vision call learned to retry transient errors after 5, 15 and 30 seconds. The busker with his guitar went through on the first try. The prompt gives him a backstory as an unhoused street musician, labelled “for performance only.”",
+    sources: ["GetOnboardTheFunkyWagon"],
+    takes: [["GetOnboardTheFunkyWagon-20260507-091811", "09:18", "fast", "Succeeded on the first attempt."]],
+    fails: []
+  },
+  {
+    day: "Thu 7 May", time: "09:42 – 10:01", title: "WheresMyDangKeys: the bus that wasn’t supposed to be there",
+    commits: [
+      ["b5f41ed", "09:42", "refactor: split activity log into per-run files; add WheresMyDangKeys prompt"],
+      ["d289737", "10:17", "chore: tighten WheresMyDangKeys prompt — no bus, centered, fidelity"]
+    ],
+    text: "Logs moved to one Markdown file per run, which is why every later run has a full record. The first draft told Veo that BP had just stepped off a bus that stays off-screen. Veo drew the bus anyway, at the right edge of the frame. The rewrite banned every object except BP and the padlock, kept BP centred, and added the first “aesthetic fidelity” block.",
+    sources: ["WheresMyDangKeys"],
+    takes: [
+      ["WheresMyDangKeys-20260507-094359", "09:43", "fast", "A city bus appears at the right edge."],
+      ["WheresMyDangKeys-20260507-095614", "09:56", "fast", "After the rewrite: centred, no bus."]
+    ],
+    fails: [["09:42", "Veo [14] model under high demand"]]
+  },
+  {
+    day: "Thu 7 May", time: "13:17 – 13:28", title: "IHaveSomethingToTellYou: two characters",
+    commits: [["a224c8a", "17:19", "feat: add IHaveSomethingToTellYou prompt — two BPs walk in, turn back, look up"]],
+    text: "The first painting with two bubble people. They walk in, turn back and look up, and both have to stay in frame the whole time. The first take came back with a soft studio backdrop and rounder, more sculpted bodies. The prompt was edited seconds before the second take.",
+    sources: ["IHaveSomethingToTellYou"],
+    takes: [
+      ["IHaveSomethingToTellYou-20260507-131709", "13:17", "fast", "Studio-like backdrop and fuller bodies."],
+      ["IHaveSomethingToTellYou-20260507-132853", "13:28", "fast", "Flatter and closer to the painting."]
+    ],
+    fails: []
+  },
+  {
+    day: "Thu 7 May", time: "17:30", title: "Axe vs chair: two paintings, one clip",
+    commits: [
+      ["be5382c", "17:23", "feat: add parallel multi-source pipeline (src/multi/)"],
+      ["e916a3d", "8 May", "feat: add axe-vs-chair multi prompt with anti-fattening guards"]
+    ],
+    text: "A second pipeline in src/multi/ sends up to three paintings as reference images, so characters from different paintings can share a scene. The axe-wielder from CarefulwithThatAx goes after the chair from TheChairisAgainsttheWall. After the first take, the prompt gained guards against “fattening”, Veo’s habit of inflating the figures. The second take ran the next morning.",
+    sources: ["CarefulwithThatAx", "TheChairisAgainsttheWall"],
+    takes: [
+      ["multi-axe-vs-chair-20260507-173003", "17:30", "fast", "First multi-source clip. Took 527 s, the longest run."],
+      ["multi-axe-vs-chair-20260508-085720", "8 May 08:57", "fast", "With the anti-fattening guards."]
+    ],
+    fails: []
+  },
+  {
+    day: "Thu 7 May", time: "17:36 – 17:56", title: "WhiteRabbit: paying for standard",
+    commits: [["a4af919", "8 May", "feat: add WhiteRabbitWhiteRabbitWhiteRabbit prompt — fire-wielding BP"]],
+    text: "Two fast-tier attempts hit the daily quota. The third went to the standard model at $4.80, the only standard-tier clip in the log. The prompt keeps the fire at its largest size fully inside the frame.",
+    sources: ["WhiteRabbitWhiteRabbitWhiteRabbit"],
+    takes: [["WhiteRabbitWhiteRabbitWhiteRabbit-20260507-175657", "17:56", "standard", "Veo 3.1 standard, $4.80."]],
+    fails: [["17:36", "429 quota exceeded (fast tier)"], ["17:38", "429 quota exceeded (fast tier)"]]
+  },
+  {
+    day: "Fri 8 May", time: "09:04 – 12:11", title: "AttractedToLight: composing for a background",
+    commits: [["8f93cf4", "14 Oct", "feat: add AttractedToLight, GameOverShameOn, … prompts (written 8 May)"]],
+    text: "Prompts now name the shot they will be composited into, here a moving hallway, and ask for clear green margin around the figure. The prompt was revised just before the second take. At 1,342 words it was the longest yet.",
+    sources: ["AttractedToLight"],
+    takes: [
+      ["AttractedToLight-20260508-090436", "09:04", "fast", "BP and the fish, built for a hallway composite."],
+      ["AttractedToLight-20260508-120427", "12:04", "fast", "After the noon prompt revision."]
+    ],
+    fails: []
+  },
+  {
+    day: "Fri 8 May", time: "12:59 – 13:16", title: "The escalator variant and --prompt",
+    commits: [
+      ["ea3b4c3", "14 Oct", "feat: add --prompt option to override action prompt path (written 8 May 12:56)"],
+      ["8f93cf4", "14 Oct", "IHaveSomethingToTellYou-escalator.md"]
+    ],
+    text: "To give one painting a second direction, the CLI gained --prompt, three minutes before it was first used. The escalator prompt says the scene is “for orientation only, NOT to be rendered,” but Veo drew the escalator handrails anyway. The next attempt was refused by the safety filter. The prompt that finally worked spelled out head margins and hand positions.",
+    sources: ["IHaveSomethingToTellYou"],
+    takes: [
+      ["IHaveSomethingToTellYou-20260508-125919", "12:59", "fast", "Escalator handrails rendered into the clip."],
+      ["IHaveSomethingToTellYou-20260508-131110", "13:11", "fast", "Seen from behind, holding hands, arms out."]
+    ],
+    fails: [["13:09", "Refused by the safety filter (not charged)"]]
+  },
+  {
+    day: "Fri 8 May", time: "13:05 – 13:44", title: "Three in forty minutes",
+    commits: [["8f93cf4", "14 Oct", "ThirdTimeaCharm, HalfPepperoniHalfCheese, GameOverShameOn prompts"]],
+    text: "By early afternoon the pipeline ran one painting after another, with each prompt written in the minutes before its run. HalfPepperoniHalfCheese is two bubble people sharing a pizza. GameOverShameOn brings back the arcade cabinet from the April test, now keyable.",
+    sources: ["ThirdTimeaCharm", "HalfPepperoniHalfCheese", "GameOverShameOn"],
+    takes: [
+      ["ThirdTimeaCharm-20260508-130523", "13:05", "fast", "Haloed BP surrounded by hearts."],
+      ["HalfPepperoniHalfCheese-20260508-132540", "13:25", "fast", "Two BPs sharing one pizza."],
+      ["GameOverShameOn-20260508-133822", "13:38", "fast", "BP and the arcade cabinet."]
+    ],
+    fails: [["13:37", "400 from Veo: generateAudio not supported by this model"]]
+  },
+  {
+    day: "Fri 8 May", time: "16:09", title: "The prompts archive",
+    commits: [["df26ceb", "14 Oct", "feat: add prompts archive builder with md/html/pdf output (written 8 May)"]],
+    text: "The last step was a script that collects every prompt used to make a video into one document, rendered as Markdown, HTML and a one-prompt-per-page PDF. It sits next to this page; the link is at the bottom.",
+    sources: [], takes: [], fails: []
+  }
+];
+
+const growth = [
+  ["NeedsMoreHoison v1", 258, true], ["NeedsMoreHoison", 424], ["GetOnboardTheFunkyWagon", 753],
+  ["WheresMyDangKeys v1", 710, true], ["WheresMyDangKeys", 871], ["IHaveSomethingToTellYou", 919],
+  ["axe-vs-chair (multi)", 1232], ["WhiteRabbit…", 889], ["AttractedToLight", 1342],
+  ["…TellYou-escalator", 1636], ["ThirdTimeaCharm", 1072], ["HalfPepperoniHalfCheese", 1138], ["GameOverShameOn", 1202]
+];
+
+const all = ["AllergicToGravity","AttractedToLight","CanIHaveMoreScreentime","CarefulwithThatAx","ComeOutsideLookAtTheStars","DaddyDaughterDance","DoIGetaParticipationTrophy","GameOverShameOn","GetOnboardTheFunkyWagon","HalfPepperoniHalfCheese","HangTheMoon","HouseofLove","IHaveSomethingToTellYou","ILoveThisone","IfIToldYouOnceIveToldYouThreeTimes","ImHerefortheBOGO","ItsaBrandNewDay","JustAskDeputyBeans","KneeHighbytheFourthofJuly","LetsHuntforGhostCrabs","LookAtWhatTheCatDraggedIn","NeedsMoreHoison","OneDay","PotatoPotahto","SheLovesMeSheLovesMeNot","ShouldHaveGoneWithTheSprayTan","SneakySneakyLookAtMyPinky","ThatWasSupposedToBeEverything","ThatsANoBrainer","TheChairisAgainsttheWall","ThirdTimeaCharm","WaningorWaxing","WhenKeepingitRealGoesWrong","WheresMyDangKeys","WhiteRabbitWhiteRabbitWhiteRabbit","YeahWeAreKindofaMess","moonhalo"];
+
+const el = (tag, attrs = {}, ...kids) => {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key === "class") node.className = value; else if (key === "text") node.textContent = value; else node.setAttribute(key, value);
+  }
+  kids.flat().forEach(kid => kid && node.append(kid));
+  return node;
+};
+
+const clip = (src, poster, label) => {
+  const video = el("video", { src, poster, muted: "", loop: "", playsinline: "", preload: "metadata", "aria-label": label });
+  video.muted = true;
+  const badge = el("span", { class: "play", text: "▶ play" });
+  const box = el("div", { class: "clip", tabindex: "0", role: "button", "aria-label": "Play " + label }, video, badge);
+  video.addEventListener("error", () => { badge.textContent = "couldn’t load clip"; });
+  const toggle = () => {
+    if (video.paused) { video.play().catch(() => {}); box.classList.add("playing"); }
+    else { video.pause(); box.classList.remove("playing"); }
+  };
+  box.addEventListener("click", toggle);
+  box.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggle(); } });
+  return box;
+};
+
+const reelVivify = document.getElementById("reel-vivify");
+vivify.forEach(take => {
+  const name = "decompose_paintings_take_" + take.n;
+  reelVivify.append(el("figure", {}, clip(`media/vivify/${name}.mp4`, `media/vivify/${name}.jpg`, "Take " + take.n),
+    el("figcaption", {}, el("b", { text: "Take " + take.n }), " · " + take.len)));
+});
+
+const reelTest = document.getElementById("reel-test");
+tests.forEach(test => {
+  reelTest.append(el("figure", {}, clip(`media/test/${test.f}.mp4`, `media/test/${test.f}.jpg`, test.t),
+    el("figcaption", {}, el("b", { text: test.t }), " · 0:08")));
+});
+
+const chapterRoot = document.getElementById("chapters");
+chapters.forEach(chapter => {
+  const commits = el("div", { class: "commits" }, chapter.commits.map(([sha, when, msg]) =>
+    el("div", { class: "commit" }, el("span", { class: "sha", text: sha }), el("span", { class: "mono", text: when }), el("span", { text: msg }))));
+  const main = el("div", { class: "main" }, el("h3", { text: chapter.title }), commits, el("p", { text: chapter.text }));
+  if (chapter.takes.length) {
+    const sources = el("div", { class: "sources" }, chapter.sources.map(src =>
+      el("figure", {}, el("img", { src: `media/paint/${src}.jpg`, alt: "Source painting " + src, loading: "lazy" }), el("figcaption", { class: "mono", text: src.length > 18 ? src.slice(0, 16) + "…" : src }))));
+    const takes = el("div", { class: "takes" }, chapter.takes.map(([file, when, tier, note]) => {
+      const cost = tier === "standard" ? "$4.80" : "$2.40";
+      return el("figure", {}, clip(`media/prod/${file}.mp4`, `media/prod/${file}.jpg`, file),
+        el("div", { class: "take-meta" }, el("span", { text: when }), el("span", { class: tier === "standard" ? "std" : "", text: tier + " · " + cost })),
+        note ? el("figcaption", { text: note }) : null);
+    }));
+    main.append(el("div", { class: "pair" }, sources, takes));
+  }
+  if (chapter.fails.length) {
+    main.append(el("div", { class: "fails" }, chapter.fails.map(([when, why]) =>
+      el("div", { class: "fail" }, el("span", { class: "mono", text: "✕ " + when }), el("span", { text: why })))));
+  }
+  chapterRoot.append(el("article", { class: "chapter" },
+    el("div", { class: "rail" }, el("span", { class: "eyebrow", text: chapter.day }), el("span", { class: "time", text: chapter.time })), main));
+});
+
+const svg = document.getElementById("growth");
+const NS = "http://www.w3.org/2000/svg";
+const chartLeft = 190, chartRight = 700, chartTop = 26, rowHeight = 26, maxWords = 1800;
+const xScale = words => chartLeft + (words / maxWords) * (chartRight - chartLeft);
+const svgEl = (tag, attrs, text) => { const node = document.createElementNS(NS, tag); for (const k in attrs) node.setAttribute(k, attrs[k]); if (text != null) node.textContent = text; svg.append(node); return node; };
+[0, 500, 1000, 1500].forEach(tick => {
+  svgEl("line", { class: "grid", x1: xScale(tick), x2: xScale(tick), y1: chartTop - 8, y2: chartTop + growth.length * rowHeight });
+  svgEl("text", { x: xScale(tick), y: 14, "text-anchor": "middle" }, tick.toLocaleString());
+});
+growth.forEach(([label, words, early], index) => {
+  const y = chartTop + index * rowHeight;
+  svgEl("text", { class: "lbl", x: chartLeft - 10, y: y + 15, "text-anchor": "end" }, label);
+  svgEl("rect", { class: early ? "bar early" : "bar", x: chartLeft, y: y + 4, width: xScale(words) - chartLeft, height: 15, rx: 2 });
+  svgEl("text", { x: xScale(words) + 6, y: y + 15 }, words.toLocaleString());
+});
+
+const used = new Set(chapters.flatMap(chapter => chapter.sources));
+const shelf = document.getElementById("shelf");
+all.filter(name => !used.has(name)).forEach(name => {
+  shelf.append(el("figure", {}, el("img", { src: `media/paint/${name}.jpg`, alt: name, loading: "lazy" }), el("figcaption", { text: name })));
+});
+
+const videos = [...document.querySelectorAll(".clip video")];
+const pauseOthers = current => videos.forEach(video => { if (video !== current && !video.paused) { video.pause(); video.parentElement.classList.remove("playing"); } });
+videos.forEach(video => video.addEventListener("play", () => pauseOthers(video)));
+</script>
+
+</body>
+</html>
